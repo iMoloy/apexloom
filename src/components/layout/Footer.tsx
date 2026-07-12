@@ -6,12 +6,41 @@ export function Footer() {
     <footer className="site-footer" id="newsletter">
       <div className="footer-wrap">
         <div className="footer-top">
-          <div><Link href="/"><BrandLogo /></Link><p className="footer-heading">Remarkable places, considered well.</p></div>
-          <div className="footer-list"><p className="footer-label">Explore</p><a href="#discover">Discover</a><a href="#collections">Collections</a><a href="#journal">Journal</a></div>
-          <div className="footer-list"><p className="footer-label">ApexLoom</p><a href="mailto:hello@apexloom.studio">Contact</a><a href="#newsletter">Newsletter</a><a href="#discover">List a space</a></div>
-          <div className="footer-list"><p className="footer-label">Follow</p><a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a><a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a></div>
+          <div>
+            <Link href="/">
+              <BrandLogo />
+            </Link>
+            <p className="footer-heading">
+              A curated stay platform for people who care about atmosphere,
+              clarity, and better trip decisions.
+            </p>
+          </div>
+          <div className="footer-list">
+            <p className="footer-label">Explore</p>
+            <a href="#discover">Discover</a>
+            <a href="#collections">Collections</a>
+            <a href="#highlights">Highlights</a>
+          </div>
+          <div className="footer-list">
+            <p className="footer-label">ApexLoom</p>
+            <a href="#journal">Journal</a>
+            <a href="#faq">FAQ</a>
+            <a href="mailto:hello@apexloom.studio">hello@apexloom.studio</a>
+          </div>
+          <div className="footer-list">
+            <p className="footer-label">Follow</p>
+            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">
+              Instagram
+            </a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
+              LinkedIn
+            </a>
+          </div>
         </div>
-        <div className="footer-bottom"><span>© {new Date().getFullYear()} ApexLoom. All rights reserved.</span><span>Made for considered travel.</span></div>
+        <div className="footer-bottom">
+          <span>© {new Date().getFullYear()} ApexLoom. All rights reserved.</span>
+          <span>Made for considered travel.</span>
+        </div>
       </div>
     </footer>
   );

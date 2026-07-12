@@ -1,11 +1,23 @@
+import { ArrowUpRight } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
+
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 font-sans">
-      <main className="text-center space-y-4">
-        <h1 className="text-4xl font-extrabold tracking-tight">ApexLoom</h1>
-        <p className="text-zinc-500 dark:text-zinc-400">Minimal setup ready.</p>
-      </main>
-    </div>
+    <main className="foundation-page">
+      <section className="foundation-intro">
+        <p className="eyebrow">Thoughtful stays, well chosen</p>
+        <BrandLogo priority />
+        <div className="foundation-copy">
+          <h1>A better way to find the places that stay with you.</h1>
+          <p>
+            ApexLoom brings together remarkable homes, slow escapes, and design-led
+            spaces worth travelling for.
+          </p>
+          <a className="text-link" href="#newsletter">
+            Join the first release <ArrowUpRight size={17} aria-hidden="true" />
+          </a>
+        </div>
+      </section>
+    </main>
   );
 }
-

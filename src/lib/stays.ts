@@ -1,4 +1,5 @@
 import { stayItems, type StayItem } from "@/data/stays";
+import { getStays } from "@/lib/dbStays";
 
 export type ExploreQuery = {
   search?: string;
@@ -25,19 +26,22 @@ export const locationOptions = Array.from(
 );
 
 export function getFeaturedStays(limit = 4) {
-  return stayItems.filter((stay) => stay.featured).slice(0, limit);
+  const currentStays = getStays();
+  return currentStays.filter((stay) => stay.featured).slice(0, limit);
 }
 
 export function getStayBySlug(slug: string) {
-  return stayItems.find((stay) => stay.slug === slug);
+  const currentStays = getStays();
+  return currentStays.find((stay) => stay.slug === slug);
 }
 
 export function getRelatedStays(stay: StayItem, limit = 4) {
-  const related = stayItems.filter(
+  const currentStays = getStays();
+  const related = currentStays.filter(
     (item) => item.slug !== stay.slug && item.collection === stay.collection,
   );
 
-  return [...related, ...stayItems.filter((item) => item.slug !== stay.slug)]
+  return [...related, ...currentStays.filter((item) => item.slug !== stay.slug)]
     .filter((item, index, array) => array.findIndex((entry) => entry.slug === item.slug) === index)
     .slice(0, limit);
 }
@@ -54,11 +58,12 @@ export function filterAndPaginateStays({
   page = 1,
   pageSize = 8,
 }: ExploreQuery): ExploreResult {
+  const currentStays = getStays();
   const normalizedSearch = search.trim().toLowerCase();
   const normalizedCollection = collection.trim().toLowerCase();
   const normalizedLocation = location.trim().toLowerCase();
 
-  let filtered = stayItems.filter((stay) => {
+  let filtered = currentStays.filter((stay) => {
     const searchable = [
       stay.title,
       stay.location,
@@ -111,3 +116,4 @@ export function filterAndPaginateStays({
     currentPage,
   };
 }
+

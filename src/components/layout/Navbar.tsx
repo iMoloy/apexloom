@@ -6,11 +6,11 @@ import { useState } from "react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 
 const links = [
-  { label: "Discover", href: "#discover" },
-  { label: "Collections", href: "#collections" },
-  { label: "Highlights", href: "#highlights" },
-  { label: "Journal", href: "#journal" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Discover", href: "/#discover" },
+  { label: "Explore", href: "/explore" },
+  { label: "Collections", href: "/#collections" },
+  { label: "Journal", href: "/#journal" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 export function Navbar() {
@@ -24,18 +24,18 @@ export function Navbar() {
         </Link>
         <nav className="nav-links" aria-label="Primary navigation">
           {links.map((link) => (
-            <a className="nav-link" href={link.href} key={link.label}>
+            <Link className="nav-link" href={link.href} key={link.label}>
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="nav-actions">
-          <a className="nav-link" href="#reviews">
+          <Link className="nav-link" href="/#reviews">
             Guest notes
-          </a>
-          <a className="nav-cta" href="#newsletter">
+          </Link>
+          <Link className="nav-cta" href="/#newsletter">
             Join updates
-          </a>
+          </Link>
           <button
             className="menu-trigger"
             type="button"
@@ -50,16 +50,16 @@ export function Navbar() {
       {isOpen && (
         <nav className="mobile-menu" aria-label="Mobile navigation">
           {links.map((link) => (
-            <a href={link.href} key={link.label} onClick={() => setIsOpen(false)}>
+            <Link href={link.href} key={link.label} onClick={() => setIsOpen(false)}>
               {link.label}
-            </a>
+            </Link>
           ))}
-          <a href="#reviews" onClick={() => setIsOpen(false)}>
+          <Link href="/#reviews" onClick={() => setIsOpen(false)}>
             Guest notes
-          </a>
-          <a className="nav-cta" href="#newsletter" onClick={() => setIsOpen(false)}>
+          </Link>
+          <Link className="nav-cta" href="/#newsletter" onClick={() => setIsOpen(false)}>
             Join updates
-          </a>
+          </Link>
         </nav>
       )}
     </header>

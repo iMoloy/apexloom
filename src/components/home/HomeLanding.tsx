@@ -1,5 +1,6 @@
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { StayGrid } from "@/components/stays/StayGrid";
 import {
   collections,
   faqItems,
@@ -10,6 +11,7 @@ import {
   storyCards,
   testimonials,
 } from "@/data/home";
+import { getFeaturedStays } from "@/lib/stays";
 
 const collectionToneClass: Record<(typeof collections)[number]["tone"], string> = {
   forest: "collection-card collection-card--forest",
@@ -18,12 +20,17 @@ const collectionToneClass: Record<(typeof collections)[number]["tone"], string> 
 };
 
 export function HomeLanding() {
+  const featuredStays = getFeaturedStays();
+
   return (
     <main className="landing-page">
       <section className="hero-shell">
         <div className="hero-grid">
           <div className="hero-panel">
-            <p className="eyebrow">Thoughtful stays, well chosen</p>
+            <div className="hero-ribbon">
+              <p className="eyebrow">Thoughtful stays, well chosen</p>
+              <span className="hero-ribbon__tag">Editorial selection</span>
+            </div>
             <BrandLogo priority />
             <div className="foundation-copy">
               <h1>A better way to find the places that stay with you.</h1>
@@ -40,6 +47,16 @@ export function HomeLanding() {
                 Read the journal <ArrowUpRight size={17} aria-hidden="true" />
               </a>
             </div>
+            <div className="hero-ledger">
+              <div>
+                <span>Current release</span>
+                <strong>City stays, slow houses, signature retreats</strong>
+              </div>
+              <div>
+                <span>Built for</span>
+                <strong>Guests who choose with taste and intent</strong>
+              </div>
+            </div>
           </div>
 
           <div className="hero-aside">
@@ -49,6 +66,10 @@ export function HomeLanding() {
                 Every stay is screened for atmosphere, clarity, and the details
                 guests actually rely on once the trip begins.
               </p>
+            </div>
+            <div className="hero-spotlight">
+              <span>What makes ApexLoom different</span>
+              <h3>We edit the catalog before you ever start comparing it.</h3>
             </div>
             <div className="hero-metrics">
               {heroMetrics.map((metric) => (
@@ -165,6 +186,26 @@ export function HomeLanding() {
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="page-section" id="featured-stays">
+        <div className="section-heading section-heading--split">
+          <div>
+            <p className="section-kicker">Featured stays</p>
+            <h2>Four considered places to start the search properly.</h2>
+          </div>
+          <div className="section-rail">
+            <p className="section-copy">
+              These featured stays already connect to the full explore catalog and
+              each one opens into a public details page with specifications,
+              reviews, and related places.
+            </p>
+            <a className="inline-link" href="/explore">
+              Open full explore view <ArrowRight size={16} aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+        <StayGrid items={featuredStays} />
       </section>
 
       <section className="page-section" id="journal">

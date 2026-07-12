@@ -17,14 +17,14 @@ export function Footer() {
           </div>
           <div className="footer-list">
             <p className="footer-label">Explore</p>
-            <a href="#discover">Discover</a>
-            <a href="#collections">Collections</a>
-            <a href="#highlights">Highlights</a>
+            <Link href="/#discover">Discover</Link>
+            <Link href="/explore">Explore stays</Link>
+            <Link href="/#highlights">Highlights</Link>
           </div>
           <div className="footer-list">
             <p className="footer-label">ApexLoom</p>
-            <a href="#journal">Journal</a>
-            <a href="#faq">FAQ</a>
+            <Link href="/#journal">Journal</Link>
+            <Link href="/#faq">FAQ</Link>
             <a href="mailto:hello@apexloom.studio">hello@apexloom.studio</a>
           </div>
           <div className="footer-list">

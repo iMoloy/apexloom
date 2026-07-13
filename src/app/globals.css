@@ -224,7 +224,7 @@ img {
 
 .footer-top {
   display: grid;
-  grid-template-columns: 1.8fr repeat(3, 1fr);
+  grid-template-columns: 1.8fr repeat(2, 1fr);
   gap: 32px;
   padding-bottom: 56px;
 }

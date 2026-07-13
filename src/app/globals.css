@@ -276,11 +276,13 @@ img {
 .footer-bottom a {
   color: var(--text-3);
   text-decoration: none;
-  transition: color 0.2s;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
 }
 
 .footer-bottom a:hover {
   color: var(--gold);
+  transform: translateY(-2px);
 }
 
 /* ============================================================

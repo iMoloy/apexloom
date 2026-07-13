@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Bath, BedDouble, MapPin, Star, Users } from "lucide-react";
 import { StayGrid } from "@/components/stays/StayGrid";
 import { getRelatedStays, getStayBySlug, buildStayArtUrl } from "@/lib/stays";
+import { BookingWidget } from "@/components/stays/BookingWidget";
 
 type StayDetailsPageProps = {
   params: Promise<{ slug: string }>;
@@ -114,6 +115,15 @@ export default async function StayDetailsPage({ params }: StayDetailsPageProps) 
         </div>
 
         <aside className="details-sidebar">
+          <div className="mb-6">
+            <BookingWidget
+              staySlug={stay.slug}
+              pricePerNight={stay.pricePerNight}
+              maxGuests={stay.guestCount}
+              stayTitle={stay.title}
+            />
+          </div>
+
           <article className="details-panel">
             <p className="section-kicker">Specifications</p>
             <h2>Key information</h2>

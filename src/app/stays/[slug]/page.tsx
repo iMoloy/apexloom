@@ -4,7 +4,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Bath, BedDouble, MapPin, Star, Users } from "lucide-react";
 import { StayGrid } from "@/components/stays/StayGrid";
-import { getRelatedStays, getStayBySlug, buildStayArtUrl } from "@/lib/stays";
+import { buildStayArtUrl } from "@/lib/stays";
+import { getRelatedStays, getStayBySlug } from "@/lib/staysServer";
 import { BookingWidget } from "@/components/stays/BookingWidget";
 
 type StayDetailsPageProps = {

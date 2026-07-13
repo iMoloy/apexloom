@@ -11,7 +11,7 @@ import {
   storyCards,
   testimonials,
 } from "@/data/home";
-import { getFeaturedStays } from "@/lib/stays";
+import { getFeaturedStays } from "@/lib/staysServer";
 
 const collectionToneClass: Record<(typeof collections)[number]["tone"], string> = {
   forest: "collection-card collection-card--forest",

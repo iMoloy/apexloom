@@ -27,6 +27,7 @@ export type StayItem = {
   amenities: string[];
   galleryLabels: [string, string, string];
   reviews: StayReview[];
+  ownerEmail?: string;
 };
 
 export const stayItems: StayItem[] = [

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ExploreFilters } from "@/components/stays/ExploreFilters";
 import { Pagination } from "@/components/stays/Pagination";
 import { StayGrid } from "@/components/stays/StayGrid";
-import { filterAndPaginateStays } from "@/lib/stays";
+import { filterAndPaginateStays } from "@/lib/staysServer";
 
 type ExplorePageProps = {
   searchParams: Promise<{

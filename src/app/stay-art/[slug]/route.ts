@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getStayBySlug } from "@/lib/stays";
+import { getStayBySlug } from "@/lib/staysServer";
 
 const sceneLabels: Record<string, string> = {
   cover: "Arrival view",

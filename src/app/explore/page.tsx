@@ -27,7 +27,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const currentSort = resolvedParams.sort ?? "featured";
   const currentPage = Number(resolvedParams.page ?? "1") || 1;
 
-  const result = filterAndPaginateStays({
+  const result = await filterAndPaginateStays({
     search: currentSearch,
     collection: currentCollection,
     location: currentLocation,

@@ -46,6 +46,7 @@ export default function AddStayPage() {
   const [collection, setCollection] = useState<any>("Quiet City Stays");
   const [stayType, setStayType] = useState<any>("House");
   const [pricePerNight, setPricePerNight] = useState<number>(250);
+  const [imageUrl, setImageUrl] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [fullDescription, setFullDescription] = useState("");
   const [hostNote, setHostNote] = useState("");
@@ -120,6 +121,7 @@ export default function AddStayPage() {
           collection,
           stayType,
           pricePerNight,
+          imageUrl,
           shortDescription,
           fullDescription,
           hostNote,
@@ -147,45 +149,72 @@ export default function AddStayPage() {
 
   if (loadingUser || !user || user.role !== "host") {
     return (
-      <div className="flex-grow flex items-center justify-center p-20 text-xs font-semibold text-[#667085]">
+      <div className="flex-grow flex items-center justify-center p-20 text-xs font-semibold" style={{ color: "var(--text-3)" }}>
         Verifying host configurations...
       </div>
     );
   }
+
+  const inputStyle = {
+    width: "100%",
+    padding: "0 14px",
+    borderRadius: "8px",
+    height: "44px",
+    border: "1px solid var(--border)",
+    background: "var(--surface)",
+    color: "var(--text)",
+    fontSize: "0.85rem",
+    outline: "none",
+    transition: "border-color 0.2s"
+  };
+
+  const labelStyle = {
+    display: "block",
+    marginBottom: "8px",
+    fontSize: "0.7rem",
+    fontWeight: 700,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase" as const,
+    color: "var(--text-3)"
+  };
 
   return (
     <main className="max-w-7xl mx-auto px-6 py-12 flex-grow w-full space-y-6">
       <div className="flex items-center gap-2">
         <Link
           href="/stays/manage"
-          className="flex items-center gap-1 text-xs font-bold text-[#667085] hover:text-[#111827] transition-colors"
+          className="flex items-center gap-1 text-xs font-bold transition-colors"
+          style={{ color: "var(--text-3)" }}
         >
           <ArrowLeft size={14} />
-          <span>Back to dashboard</span>
+          <span className="hover:text-[var(--gold)] transition-colors">Back to dashboard</span>
         </Link>
       </div>
 
-      <div className="border-b border-[#d9d2c6]/40 pb-4">
-        <span className="text-[10px] tracking-[0.25em] text-[#c46c42] uppercase font-bold">Curator Sandbox</span>
-        <h1 className="text-3xl font-display font-semibold text-[#111827] mt-1">Add Curated Stay</h1>
-        <p className="text-xs text-[#667085] mt-0.5">Submit a design-led space for our editorial selection catalog.</p>
+      <div style={{ borderBottom: "1px solid var(--border)", paddingBottom: "24px" }}>
+        <span style={{ display: "inline-block", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "4px" }}>
+          Curator Sandbox
+        </span>
+        <h1 style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "2rem", fontWeight: 600, color: "var(--text)", margin: 0 }}>Add Curated Stay</h1>
+        <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "var(--text-2)" }}>Submit a design-led space for our editorial selection catalog.</p>
       </div>
 
       {/* Two Column Form + Preview Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Left Column - Form */}
-        <form onSubmit={handleSubmit} className="lg:col-span-7 bg-white border border-[#d9d2c6]/60 p-6 rounded-2xl shadow-sm space-y-5">
-          <h2 className="text-sm uppercase tracking-wider font-bold text-[#111827] border-b border-[#d9d2c6]/30 pb-2">Stay Specifications</h2>
+        <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-6" style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "32px", borderRadius: "14px" }}>
+          <span style={{ display: "inline-block", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "8px" }}>Stay Specifications</span>
 
           {/* Title input */}
           <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Stay Title *</span>
+            <label style={labelStyle}>Stay Title *</label>
             <input
               type="text"
               placeholder="E.g. Solenne House"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none"
+              style={inputStyle}
+              className="focus:border-[var(--gold)]"
               required
             />
           </div>
@@ -193,24 +222,26 @@ export default function AddStayPage() {
           {/* Location details */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">City Location *</span>
+              <label style={labelStyle}>City Location *</label>
               <input
                 type="text"
                 placeholder="E.g. Lisbon"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none"
+                style={inputStyle}
+                className="focus:border-[var(--gold)]"
                 required
               />
             </div>
             <div>
-              <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Country *</span>
+              <label style={labelStyle}>Country *</label>
               <input
                 type="text"
                 placeholder="E.g. Portugal"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none"
+                style={inputStyle}
+                className="focus:border-[var(--gold)]"
                 required
               />
             </div>
@@ -219,11 +250,12 @@ export default function AddStayPage() {
           {/* Category & Types select dropdowns */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Collection *</span>
+              <label style={labelStyle}>Collection *</label>
               <select
                 value={collection}
                 onChange={(e) => setCollection(e.target.value as any)}
-                className="w-full px-2.5 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] focus:border-[#1d4d45] focus:outline-none bg-white"
+                style={inputStyle}
+                className="focus:border-[var(--gold)]"
               >
                 <option value="Quiet City Stays">Quiet City Stays</option>
                 <option value="Slow Weekend Houses">Slow Weekend Houses</option>
@@ -231,11 +263,12 @@ export default function AddStayPage() {
               </select>
             </div>
             <div>
-              <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Stay Type *</span>
+              <label style={labelStyle}>Stay Type *</label>
               <select
                 value={stayType}
                 onChange={(e) => setStayType(e.target.value as any)}
-                className="w-full px-2.5 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] focus:border-[#1d4d45] focus:outline-none bg-white"
+                style={inputStyle}
+                className="focus:border-[var(--gold)]"
               >
                 <option value="Apartment">Apartment</option>
                 <option value="Townhouse">Townhouse</option>
@@ -245,54 +278,71 @@ export default function AddStayPage() {
               </select>
             </div>
             <div>
-              <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Price per Night ($) *</span>
+              <label style={labelStyle}>Price per Night ($) *</label>
               <input
                 type="number"
                 min={10}
                 max={5000}
                 value={pricePerNight}
                 onChange={(e) => setPricePerNight(Number(e.target.value))}
-                className="w-full px-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] focus:border-[#1d4d45] focus:outline-none"
+                style={inputStyle}
+                className="focus:border-[var(--gold)]"
                 required
               />
             </div>
           </div>
 
+          {/* Optional Image URL */}
+          <div>
+            <label style={labelStyle}>Featured Image URL (Optional)</label>
+            <input
+              type="url"
+              placeholder="https://example.com/image.jpg"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              style={inputStyle}
+              className="focus:border-[var(--gold)]"
+            />
+          </div>
+
           {/* Core specs details */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Guests Limit *</span>
+              <label style={labelStyle}>Guests Limit *</label>
               <input
                 type="number"
                 min={1}
                 max={30}
                 value={guestCount}
                 onChange={(e) => setGuestCount(Number(e.target.value))}
-                className="w-full px-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] focus:border-[#1d4d45] focus:outline-none"
+                style={inputStyle}
+                className="focus:border-[var(--gold)]"
                 required
               />
             </div>
             <div>
-              <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Bedrooms *</span>
+              <label style={labelStyle}>Bedrooms *</label>
               <input
                 type="number"
                 min={1}
                 max={15}
                 value={bedrooms}
                 onChange={(e) => setBedrooms(Number(e.target.value))}
-                className="w-full px-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] focus:border-[#1d4d45] focus:outline-none"
+                style={inputStyle}
+                className="focus:border-[var(--gold)]"
                 required
               />
             </div>
             <div>
-              <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Bathrooms *</span>
+              <label style={labelStyle}>Bathrooms *</label>
               <input
                 type="number"
                 min={1}
                 max={15}
                 value={baths}
                 onChange={(e) => setBaths(Number(e.target.value))}
-                className="w-full px-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] focus:border-[#1d4d45] focus:outline-none"
+                style={inputStyle}
+                className="focus:border-[var(--gold)]"
                 required
               />
             </div>
@@ -300,68 +350,84 @@ export default function AddStayPage() {
 
           {/* Description details */}
           <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Best For (Short kicker summary) *</span>
+            <label style={labelStyle}>Best For (Short kicker summary) *</label>
             <input
               type="text"
               placeholder="E.g. Creative groups, restorative weekends, remote work loops"
               value={bestFor}
               onChange={(e) => setBestFor(e.target.value)}
-              className="w-full px-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none"
+              style={inputStyle}
+              className="focus:border-[var(--gold)]"
               required
             />
           </div>
 
           <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Catalog Short Description *</span>
+            <label style={labelStyle}>Catalog Short Description *</label>
             <input
               type="text"
               placeholder="A one-line preview summary of the stay experience..."
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
-              className="w-full px-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none"
+              style={inputStyle}
+              className="focus:border-[var(--gold)]"
               maxLength={150}
               required
             />
           </div>
 
           <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Editorial Full Description *</span>
+            <label style={labelStyle}>Editorial Full Description *</label>
             <textarea
               placeholder="Describe the architectural details, the atmosphere, layout flow, and style notes of the stay..."
               value={fullDescription}
               onChange={(e) => setFullDescription(e.target.value)}
-              className="w-full p-3 rounded-lg h-24 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none resize-none"
+              style={{ ...inputStyle, height: "100px", padding: "12px 14px", resize: "none" }}
+              className="focus:border-[var(--gold)]"
               required
             />
           </div>
 
           <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Host arrival notes & recommendations *</span>
+            <label style={labelStyle}>Host arrival notes & recommendations *</label>
             <textarea
               placeholder="E.g. Nearby coffee shops timing guides, packing rules, check-in instructions..."
               value={hostNote}
               onChange={(e) => setHostNote(e.target.value)}
-              className="w-full p-3 rounded-lg h-20 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none resize-none"
+              style={{ ...inputStyle, height: "80px", padding: "12px 14px", resize: "none" }}
+              className="focus:border-[var(--gold)]"
               required
             />
           </div>
 
           {/* Amenities checklist checkboxes */}
           <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-2 font-bold font-mono">Amenities checklist</span>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <label style={labelStyle}>Amenities checklist</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {availableAmenities.map((amenity) => {
                 const checked = selectedAmenities.includes(amenity);
                 return (
                   <label
                     key={amenity}
-                    className={`flex items-center gap-2 p-2 border rounded-lg text-[10px] font-semibold cursor-pointer transition-colors ${checked ? "border-[#1d4d45] bg-[#1d4d45]/5 text-forest" : "border-[#d9d2c6] text-[#667085]"}`}
+                    className="cursor-pointer transition-colors"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "10px 14px",
+                      border: checked ? "1px solid rgba(201, 169, 110, 0.4)" : "1px solid var(--border-2)",
+                      borderRadius: "8px",
+                      background: checked ? "rgba(201, 169, 110, 0.05)" : "var(--surface-2)",
+                      color: checked ? "var(--gold)" : "var(--text-3)",
+                      fontSize: "0.75rem",
+                      fontWeight: 600
+                    }}
                   >
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => handleAmenityToggle(amenity)}
-                      className="rounded border-[#d9d2c6] text-[#1d4d45] focus:ring-[#1d4d45] h-3.5 w-3.5"
+                      style={{ accentColor: "var(--gold)", width: "14px", height: "14px" }}
                     />
                     <span>{amenity}</span>
                   </label>
@@ -373,22 +439,40 @@ export default function AddStayPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-[#1d4d45] hover:bg-[#153832] text-white py-2.5 text-xs font-bold shadow transition-colors cursor-pointer disabled:opacity-50"
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              padding: "14px",
+              background: "var(--gold)",
+              color: "var(--bg)",
+              borderRadius: "8px",
+              fontSize: "0.85rem",
+              fontWeight: 700,
+              border: "none",
+              cursor: submitting ? "not-allowed" : "pointer",
+              opacity: submitting ? 0.7 : 1,
+              marginTop: "16px",
+              transition: "transform 0.2s"
+            }}
+            className={submitting ? "" : "hover:-translate-y-0.5"}
           >
-            <Plus size={14} />
+            <Plus size={16} />
             <span>{submitting ? "Adding to Curation..." : "Add Curated listing"}</span>
           </button>
         </form>
 
         {/* Right Column - Live Preview */}
         <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-4">
-          <div className="bg-[#f5f2ea]/40 border border-[#d9d2c6]/60 p-4 rounded-2xl">
-            <span className="text-[9px] uppercase tracking-wider text-[#667085] font-bold">Interactive Sandbox</span>
-            <h3 className="text-sm font-semibold text-[#111827] mt-0.5">Live Card Preview</h3>
-            <p className="text-[11px] text-[#667085]">This card re-renders dynamically as specifications are entered.</p>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "20px", borderRadius: "14px" }}>
+            <span style={{ display: "inline-block", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "4px" }}>Interactive Sandbox</span>
+            <h3 style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.1rem", fontWeight: 600, color: "var(--text)", margin: 0 }}>Live Card Preview</h3>
+            <p style={{ margin: "4px 0 0", fontSize: "0.8rem", color: "var(--text-3)" }}>This card re-renders dynamically as specifications are entered.</p>
           </div>
 
-          <div className="w-full max-w-sm mx-auto">
+          <div className="w-full">
             <StayCard stay={previewStay} isPreview={true} />
           </div>
         </div>

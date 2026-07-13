@@ -4,7 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppContext";
-import { Mail, Lock, User, UserPlus } from "lucide-react";
+import { Mail, Lock, User, UserPlus, ArrowRight } from "lucide-react";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "@/lib/firebase";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function RegisterPage() {
   const [role, setRole] = useState<"guest" | "host">("guest");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,136 +51,227 @@ export default function RegisterPage() {
         setError(data.error || "Failed to create account.");
         showToast(data.error || "Signup failed.", "error");
       }
-    } catch (err) {
+    } catch {
       setError("A connection error occurred. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleGoogleLogin = async () => {
+    if (!auth) {
+      showToast("Firebase is not configured.", "error");
+      return;
+    }
+    
+    setGoogleLoading(true);
+    setError("");
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      const res = await fetch("/api/auth/social-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          name: user.displayName || "Google User",
+          provider: "google",
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`Registration complete! Welcome, ${data.user.name}.`, "success");
+        login(data.user);
+        router.push("/");
+      } else {
+        setError(data.error || "Social login failed.");
+        showToast(data.error || "Signup failed.", "error");
+      }
+    } catch (err: any) {
+      if (err.code !== "auth/popup-closed-by-user") {
+        setError("Google sign in failed.");
+        showToast("Google sign in failed.", "error");
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "12px 14px 12px 40px",
+    background: "var(--surface-2)",
+    border: "1px solid var(--border-2)",
+    borderRadius: 8,
+    color: "var(--text)",
+    fontSize: "0.9rem",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    marginBottom: 6,
+    fontSize: "0.72rem",
+    fontWeight: 700,
+    letterSpacing: "0.12em",
+    textTransform: "uppercase" as const,
+    color: "var(--text-3)",
+  };
+
   return (
-    <div className="flex-grow flex items-center justify-center px-4 py-16 bg-gradient-to-b from-[#faf9f6] to-[#f4eff0]/40">
-      <div className="w-full max-w-md bg-white border border-[#d9d2c6]/60 p-8 rounded-2xl shadow-xl space-y-6">
-        
-        {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <span className="text-[10px] tracking-[0.2em] text-[#c46c42] uppercase font-bold">New Account</span>
-          <h1 className="text-3xl font-display font-semibold text-[#111827] tracking-tight">Join ApexLoom</h1>
-          <p className="text-xs text-[#667085]">Sign up to curated travels and distinct hosting.</p>
+    <div style={{ minHeight: "calc(100vh - 72px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", background: "var(--bg)" }}>
+      <div style={{ width: "100%", maxWidth: 440 }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <span style={{ display: "inline-block", padding: "5px 14px", border: "1px solid rgba(201,169,110,0.25)", borderRadius: 99, background: "rgba(201,169,110,0.08)", color: "var(--gold)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 16 }}>
+            New Account
+          </span>
+          <h1 style={{ margin: "0 0 10px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "2.2rem", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.02em" }}>
+            Join ApexLoom
+          </h1>
+          <p style={{ margin: 0, color: "var(--text-3)", fontSize: "0.875rem" }}>
+            Create an account for curated travel and distinct hosting.
+          </p>
         </div>
 
-        {/* Local Error Card */}
-        {error && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-800 text-xs p-3 rounded-lg flex items-center gap-2">
-            <svg className="h-4 w-4 shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Register Form */}
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Full Name</span>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-[#667085]/60 pointer-events-none">
-                <User size={15} />
-              </span>
-              <input
-                type="text"
-                placeholder="E.g. Nadia Rahman"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full pl-9 pr-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none transition-all"
-                disabled={submitting}
-                required
-              />
+        {/* Card */}
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: 32, boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
+          {/* Error */}
+          {error && (
+            <div style={{ marginBottom: 20, padding: "12px 16px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, color: "#fca5a5", fontSize: "0.84rem" }}>
+              {error}
             </div>
-          </div>
+          )}
 
-          <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Email address</span>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-[#667085]/60 pointer-events-none">
-                <Mail size={15} />
-              </span>
-              <input
-                type="email"
-                placeholder="developer@apexloom.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-9 pr-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none transition-all"
-                disabled={submitting}
-                required
-              />
+          <form onSubmit={handleRegister} style={{ display: "grid", gap: 16 }}>
+            {/* Name */}
+            <div>
+              <label style={labelStyle}>Full Name</label>
+              <div style={{ position: "relative" }}>
+                <User size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", pointerEvents: "none" }} />
+                <input type="text" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} required />
+              </div>
             </div>
-          </div>
 
-          <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">Password</span>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-[#667085]/60 pointer-events-none">
-                <Lock size={15} />
-              </span>
-              <input
-                type="password"
-                placeholder="Min. 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 rounded-lg h-10 border border-[#d9d2c6] text-xs text-[#111827] placeholder-[#667085]/40 focus:border-[#1d4d45] focus:outline-none transition-all"
-                disabled={submitting}
-                required
-              />
+            {/* Email */}
+            <div>
+              <label style={labelStyle}>Email address</label>
+              <div style={{ position: "relative" }}>
+                <Mail size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", pointerEvents: "none" }} />
+                <input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} required />
+              </div>
             </div>
-          </div>
 
-          <div>
-            <span className="text-[10px] text-[#667085] uppercase tracking-wider block mb-1.5 font-bold">I want to join as</span>
-            <div className="grid grid-cols-2 gap-3">
-              <label className={`flex items-center justify-center py-2 px-3 border rounded-lg text-xs font-bold cursor-pointer transition-colors ${role === "guest" ? "border-[#1d4d45] bg-[#1d4d45]/5 text-[#1d4d45]" : "border-[#d9d2c6] text-[#667085]"}`}>
-                <input
-                  type="radio"
-                  name="role"
-                  value="guest"
-                  checked={role === "guest"}
-                  onChange={() => setRole("guest")}
-                  className="sr-only"
-                />
-                Guest Traveler
-              </label>
-              <label className={`flex items-center justify-center py-2 px-3 border rounded-lg text-xs font-bold cursor-pointer transition-colors ${role === "host" ? "border-[#1d4d45] bg-[#1d4d45]/5 text-[#1d4d45]" : "border-[#d9d2c6] text-[#667085]"}`}>
-                <input
-                  type="radio"
-                  name="role"
-                  value="host"
-                  checked={role === "host"}
-                  onChange={() => setRole("host")}
-                  className="sr-only"
-                />
-                Host Curator
-              </label>
+            {/* Password */}
+            <div>
+              <label style={labelStyle}>Password</label>
+              <div style={{ position: "relative" }}>
+                <Lock size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", pointerEvents: "none" }} />
+                <input type="password" placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} required minLength={6} />
+              </div>
             </div>
+
+            {/* Role */}
+            <div>
+              <label style={{ ...labelStyle, marginBottom: 10 }}>I am joining as</label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                {(["guest", "host"] as const).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRole(r)}
+                    style={{
+                      padding: "12px",
+                      border: `1px solid ${role === r ? "var(--gold)" : "var(--border-2)"}`,
+                      borderRadius: 8,
+                      background: role === r ? "rgba(201,169,110,0.1)" : "var(--surface-2)",
+                      color: role === r ? "var(--gold)" : "var(--text-2)",
+                      fontWeight: 700,
+                      fontSize: "0.84rem",
+                      cursor: "pointer",
+                      textTransform: "capitalize",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    {r === "guest" ? "🧳 Guest" : "🏠 Host"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                width: "100%",
+                padding: "13px",
+                background: submitting ? "var(--surface-3)" : "var(--gold)",
+                color: submitting ? "var(--text-3)" : "var(--bg)",
+                border: "none",
+                borderRadius: 8,
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                cursor: submitting ? "not-allowed" : "pointer",
+                transition: "all 0.2s",
+                marginTop: 4,
+              }}
+            >
+              <UserPlus size={16} />
+              {submitting ? "Creating account…" : "Create Account"}
+            </button>
+          </form>
+
+          {/* Social Login Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+            <span style={{ fontSize: "0.72rem", color: "var(--text-3)", fontWeight: 600, whiteSpace: "nowrap" }}>OR CONTINUE WITH</span>
+            <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
           </div>
 
           <button
-            type="submit"
-            disabled={submitting}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#1d4d45] hover:bg-[#153832] text-white py-2.5 text-xs font-bold shadow transition-colors cursor-pointer disabled:opacity-50"
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || submitting}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              width: "100%",
+              padding: "12px",
+              background: "var(--surface)",
+              color: "var(--text)",
+              border: "1px solid var(--border)",
+              borderRadius: 8,
+              fontWeight: 600,
+              fontSize: "0.9rem",
+              cursor: googleLoading || submitting ? "not-allowed" : "pointer",
+              transition: "all 0.2s",
+              marginBottom: 24,
+            }}
           >
-            <UserPlus size={14} />
-            {submitting ? "Creating account..." : "Sign Up"}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            {googleLoading ? "Connecting..." : "Google"}
           </button>
-        </form>
-
-        {/* Login Redirect */}
-        <div className="text-center text-xs text-[#667085]">
-          Already have an account?{" "}
-          <Link href="/login" className="text-[#c46c42] font-semibold hover:underline">
-            Sign In
-          </Link>
         </div>
 
+        {/* Sign in link */}
+        <p style={{ textAlign: "center", marginTop: 24, color: "var(--text-3)", fontSize: "0.84rem" }}>
+          Already have an account?{" "}
+          <Link href="/login" style={{ color: "var(--gold)", fontWeight: 600 }}>
+            Sign in <ArrowRight size={12} style={{ display: "inline", verticalAlign: "middle" }} />
+          </Link>
+        </p>
       </div>
     </div>
   );

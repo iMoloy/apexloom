@@ -1,89 +1,111 @@
-import { type StayItem } from "@/data/stays";
-import { getStays } from "@/lib/dbStays";
+import connectToDatabase from "./mongoose";
+import { Stay } from "@/models/Stay";
+import { type StayItem, stayItems } from "@/data/stays";
 import type { ExploreQuery, ExploreResult } from "./stays";
 
-export function getFeaturedStays(limit = 4) {
-  const currentStays = getStays();
-  return currentStays.filter((stay) => stay.featured).slice(0, limit);
+// Seed default stays if the database is empty
+async function seedDefaultStays() {
+  await connectToDatabase();
+  const count = await Stay.countDocuments();
+  if (count === 0) {
+    const staysWithOwner = stayItems.map(stay => ({ ...stay, ownerEmail: "host@apexloom.com" }));
+    await Stay.insertMany(staysWithOwner);
+    console.log("Seeded database with default stays");
+  }
 }
 
-export function getStayBySlug(slug: string) {
-  const currentStays = getStays();
-  return currentStays.find((stay) => stay.slug === slug);
+export async function getFeaturedStays(limit = 4): Promise<StayItem[]> {
+  await seedDefaultStays();
+  const stays = await Stay.find({ featured: true }).sort({ rating: -1 }).limit(limit).lean();
+  return stays as unknown as StayItem[];
 }
 
-export function getRelatedStays(stay: StayItem, limit = 4) {
-  const currentStays = getStays();
-  const related = currentStays.filter(
-    (item) => item.slug !== stay.slug && item.collection === stay.collection,
-  );
-
-  return [...related, ...currentStays.filter((item) => item.slug !== stay.slug)]
-    .filter((item, index, array) => array.findIndex((entry) => entry.slug === item.slug) === index)
-    .slice(0, limit);
+export async function getStayBySlug(slug: string): Promise<StayItem | null> {
+  await seedDefaultStays();
+  const stay = await Stay.findOne({ slug }).lean();
+  return stay ? (stay as unknown as StayItem) : null;
 }
 
-export function filterAndPaginateStays({
+export async function getRelatedStays(stay: StayItem, limit = 4): Promise<StayItem[]> {
+  await seedDefaultStays();
+  const related = await Stay.find({
+    slug: { $ne: stay.slug },
+    collection: stay.collection
+  }).limit(limit).lean();
+
+  let results = related as unknown as StayItem[];
+
+  if (results.length < limit) {
+    const more = await Stay.find({
+      slug: { $nin: [stay.slug, ...results.map(r => r.slug)] }
+    }).limit(limit - results.length).lean();
+    results = [...results, ...more as unknown as StayItem[]];
+  }
+
+  return results;
+}
+
+export async function filterAndPaginateStays({
   search = "",
   collection = "",
   location = "",
   sort = "featured",
   page = 1,
   pageSize = 8,
-}: ExploreQuery): ExploreResult {
-  const currentStays = getStays();
-  const normalizedSearch = search.trim().toLowerCase();
-  const normalizedCollection = collection.trim().toLowerCase();
-  const normalizedLocation = location.trim().toLowerCase();
+}: ExploreQuery): Promise<ExploreResult> {
+  await seedDefaultStays();
+  
+  const query: any = {};
 
-  let filtered = currentStays.filter((stay) => {
-    const searchable = [
-      stay.title,
-      stay.location,
-      stay.country,
-      stay.collection,
-      stay.stayType,
-      stay.bestFor,
-    ]
-      .join(" ")
-      .toLowerCase();
+  if (collection) {
+    query.collection = new RegExp(`^${collection}$`, 'i');
+  }
 
-    const matchesSearch = normalizedSearch
-      ? searchable.includes(normalizedSearch)
-      : true;
-    const matchesCollection = normalizedCollection
-      ? stay.collection.toLowerCase() === normalizedCollection
-      : true;
-    const matchesLocation = normalizedLocation
-      ? `${stay.location}, ${stay.country}`.toLowerCase() === normalizedLocation
-      : true;
+  if (location) {
+    // Basic string matching for "City, Country"
+    query.$or = [
+      { location: new RegExp(location.split(',')[0], 'i') },
+      { country: new RegExp(location.split(',')[0], 'i') }
+    ];
+  }
 
-    return matchesSearch && matchesCollection && matchesLocation;
-  });
+  if (search) {
+    const searchRegex = new RegExp(search, 'i');
+    const existingOr = query.$or || [];
+    query.$or = [
+      ...existingOr,
+      { title: searchRegex },
+      { location: searchRegex },
+      { country: searchRegex },
+      { collection: searchRegex },
+      { stayType: searchRegex },
+      { bestFor: searchRegex }
+    ];
+  }
 
-  filtered = filtered.sort((left, right) => {
-    switch (sort) {
-      case "price-low":
-        return left.pricePerNight - right.pricePerNight;
-      case "price-high":
-        return right.pricePerNight - left.pricePerNight;
-      case "rating":
-        return right.rating - left.rating;
-      case "latest":
-        return right.publishedOn.localeCompare(left.publishedOn);
-      case "featured":
-      default:
-        return Number(right.featured) - Number(left.featured) || right.rating - left.rating;
-    }
-  });
+  let sortQuery: any = {};
+  switch (sort) {
+    case "price-low": sortQuery = { pricePerNight: 1 }; break;
+    case "price-high": sortQuery = { pricePerNight: -1 }; break;
+    case "rating": sortQuery = { rating: -1 }; break;
+    case "latest": sortQuery = { publishedOn: -1 }; break;
+    case "featured":
+    default: sortQuery = { featured: -1, rating: -1 }; break;
+  }
 
-  const totalItems = filtered.length;
+  const totalItems = await Stay.countDocuments(query);
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const currentPage = Math.min(Math.max(page, 1), totalPages);
   const start = (currentPage - 1) * pageSize;
 
+  const items = await Stay.find(query)
+    .sort(sortQuery)
+    .skip(start)
+    .limit(pageSize)
+    .lean();
+
   return {
-    items: filtered.slice(start, start + pageSize),
+    items: items as unknown as StayItem[],
     totalItems,
     totalPages,
     currentPage,

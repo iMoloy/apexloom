@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppContext";
 import {
@@ -26,7 +26,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { StayItem } from "@/data/stays";
-import type { BookingRecord } from "@/lib/dbStays";
+import type { BookingRecord } from "@/models/Booking";
+import Image from "next/image";
 
 const impressionData = [
   { month: "Feb", views: 180, inquiries: 45 },
@@ -59,9 +60,8 @@ export default function ManageStaysPage() {
     }
   }, [user, loadingUser, router, showToast]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      // Fetch stays
       const resStays = await fetch("/api/stays");
       const dataStays = await resStays.json();
       
@@ -78,13 +78,14 @@ export default function ManageStaysPage() {
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData();
     }
-  }, [user]);
+  }, [user, fetchData]);
 
   const handleDeleteStay = async (slug: string, title: string) => {
     if (!confirm(`Are you sure you want to remove the curated listing "${title}"?`)) {
@@ -107,7 +108,7 @@ export default function ManageStaysPage() {
 
   if (loadingUser || !user || loadingData) {
     return (
-      <div className="flex-grow flex items-center justify-center p-20 text-xs font-semibold text-[#667085]">
+      <div className="flex-grow flex items-center justify-center p-20 text-xs font-semibold" style={{ color: "var(--text-3)" }}>
         Loading dashboard configurations...
       </div>
     );
@@ -119,22 +120,37 @@ export default function ManageStaysPage() {
   return (
     <main className="max-w-7xl mx-auto px-6 py-12 space-y-10 flex-grow w-full">
       {/* Dashboard Welcome Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#d9d2c6]/40 pb-6">
-        <div>
-          <span className="text-[10px] tracking-[0.25em] text-[#c46c42] uppercase font-bold">Curation Control</span>
-          <h1 className="text-3xl font-display font-semibold text-[#111827] mt-1">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="w-full">
+          <span style={{ display: "inline-block", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "4px" }}>
+            Curation Control
+          </span>
+          <h1 style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "2rem", fontWeight: 600, color: "var(--text)", margin: 0 }}>
             Hello, {user.name}
           </h1>
-          <p className="text-xs text-[#667085] mt-0.5">
-            Role: <strong className="capitalize">{user.role}</strong> · Manage listings, review statistics, and monitor reservation flows.
+          <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "var(--text-2)" }}>
+            Role: <strong className="capitalize" style={{ color: "var(--text)" }}>{user.role}</strong> · Manage listings, review statistics, and monitor reservation flows.
           </p>
         </div>
         {user.role === "host" && (
           <Link
             href="/stays/add"
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#1d4d45] hover:bg-[#153832] rounded-lg shadow transition-colors cursor-pointer"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "10px 16px",
+              background: "var(--gold)",
+              color: "var(--bg)",
+              borderRadius: "8px",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              flexShrink: 0,
+              transition: "transform 0.2s"
+            }}
+            className="hover:-translate-y-0.5"
           >
-            <Home size={13} />
+            <Home size={14} />
             <span>Add new stay</span>
           </Link>
         )}
@@ -145,64 +161,85 @@ export default function ManageStaysPage() {
         <div className="space-y-6">
           {/* Quick Metrics grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white border border-[#d9d2c6]/60 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-[#1d4d45]/5 rounded-xl text-forest shrink-0">
-                <Home size={20} />
+            {[
+              { label: "Active properties", value: hostStays.length, icon: <Home size={20} /> },
+              { label: "Page views", value: "1,820", icon: <TrendingUp size={20} /> },
+              { label: "Rating average", value: "4.9/5", icon: <Award size={20} /> },
+              { label: "Total earnings", value: "$12,750", icon: <DollarSign size={20} /> },
+            ].map((metric) => (
+              <div key={metric.label} style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                padding: "24px 20px",
+                borderRadius: "14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px"
+              }}>
+                <div style={{
+                  padding: "12px",
+                  background: "rgba(201, 169, 110, 0.1)",
+                  borderRadius: "12px",
+                  color: "var(--gold)",
+                  flexShrink: 0
+                }}>
+                  {metric.icon}
+                </div>
+                <div>
+                  <strong style={{ display: "block", fontSize: "1.4rem", fontWeight: 600, color: "var(--text)", lineHeight: 1.2 }}>{metric.value}</strong>
+                  <span style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>{metric.label}</span>
+                </div>
               </div>
-              <div>
-                <strong className="block text-xl text-[#111827] font-semibold">{hostStays.length}</strong>
-                <span className="text-[10px] uppercase font-bold text-[#667085] tracking-wider">Active properties</span>
-              </div>
-            </div>
-
-            <div className="bg-white border border-[#d9d2c6]/60 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-[#c46c42]/5 rounded-xl text-[#c46c42] shrink-0">
-                <TrendingUp size={20} />
-              </div>
-              <div>
-                <strong className="block text-xl text-[#111827] font-semibold">1,820</strong>
-                <span className="text-[10px] uppercase font-bold text-[#667085] tracking-wider">Page views</span>
-              </div>
-            </div>
-
-            <div className="bg-white border border-[#d9d2c6]/60 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-[#1d4d45]/5 rounded-xl text-forest shrink-0">
-                <Award size={20} />
-              </div>
-              <div>
-                <strong className="block text-xl text-[#111827] font-semibold">4.9/5</strong>
-                <span className="text-[10px] uppercase font-bold text-[#667085] tracking-wider">Rating average</span>
-              </div>
-            </div>
-
-            <div className="bg-white border border-[#d9d2c6]/60 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-              <div className="p-3 bg-[#c46c42]/5 rounded-xl text-[#c46c42] shrink-0">
-                <DollarSign size={20} />
-              </div>
-              <div>
-                <strong className="block text-xl text-[#111827] font-semibold">$12,750</strong>
-                <span className="text-[10px] uppercase font-bold text-[#667085] tracking-wider">Total earnings</span>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Analytics Charts Area */}
-          <div className="bg-white border border-[#d9d2c6]/60 p-6 rounded-2xl shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h3 className="text-base font-semibold text-[#111827]">Curation Analytics</h3>
-                <p className="text-xs text-[#667085]">Live tracking of catalog activity and category returns.</p>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "32px", borderRadius: "14px" }}>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+              <div className="w-full sm:w-auto">
+                <span style={{ display: "inline-block", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "4px" }}>
+                  Curation Analytics
+                </span>
+                <h3 style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.4rem", fontWeight: 600, color: "var(--text)", margin: 0 }}>Analytics overview</h3>
+                <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "var(--text-2)" }}>Live tracking of catalog activity and category returns.</p>
               </div>
-              <div className="flex bg-[#f5f2ea]/60 border border-[#d9d2c6]/60 p-0.5 rounded-lg text-xs">
+              <div style={{
+                display: "flex",
+                background: "var(--surface-2)",
+                border: "1px solid var(--border)",
+                padding: "4px",
+                borderRadius: "10px",
+                flexShrink: 0
+              }}>
                 <button
                   onClick={() => setChartMode("views")}
-                  className={`px-3 py-1 font-bold rounded-md transition-colors cursor-pointer ${chartMode === "views" ? "bg-white text-forest shadow-sm" : "text-[#667085] hover:text-[#111827]"}`}
+                  style={{
+                    padding: "8px 16px",
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    background: chartMode === "views" ? "var(--surface)" : "transparent",
+                    color: chartMode === "views" ? "var(--text)" : "var(--text-3)",
+                    border: chartMode === "views" ? "1px solid var(--border)" : "1px solid transparent",
+                  }}
                 >
                   Views Over Time
                 </button>
                 <button
                   onClick={() => setChartMode("revenue")}
-                  className={`px-3 py-1 font-bold rounded-md transition-colors cursor-pointer ${chartMode === "revenue" ? "bg-white text-forest shadow-sm" : "text-[#667085] hover:text-[#111827]"}`}
+                  style={{
+                    padding: "8px 16px",
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    background: chartMode === "revenue" ? "var(--surface)" : "transparent",
+                    color: chartMode === "revenue" ? "var(--text)" : "var(--text-3)",
+                    border: chartMode === "revenue" ? "1px solid var(--border)" : "1px solid transparent",
+                  }}
                 >
                   Revenue by Category
                 </button>
@@ -210,50 +247,55 @@ export default function ManageStaysPage() {
             </div>
 
             {/* Recharts container */}
-            <div className="h-64 w-full">
+            <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 {chartMode === "views" ? (
                   <AreaChart data={impressionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1d4d45" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="#1d4d45" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#c9a96e" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#c9a96e" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#d9d2c6" opacity={0.2} vertical={false} />
-                    <XAxis dataKey="month" stroke="#667085" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#667085" fontSize={10} tickLine={false} axisLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} vertical={false} />
+                    <XAxis dataKey="month" stroke="var(--text-3)" fontSize={11} tickLine={false} axisLine={false} />
+                    <YAxis stroke="var(--text-3)" fontSize={11} tickLine={false} axisLine={false} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#fffdf8",
-                        border: "1px solid #d9d2c6",
+                        backgroundColor: "var(--surface-3)",
+                        border: "1px solid var(--border-2)",
                         borderRadius: "10px",
-                        fontSize: "11px",
+                        fontSize: "12px",
+                        color: "var(--text)",
                       }}
+                      itemStyle={{ color: "var(--gold)" }}
                     />
                     <Area
                       type="monotone"
                       dataKey="views"
-                      stroke="#1d4d45"
-                      strokeWidth={2}
+                      stroke="#c9a96e"
+                      strokeWidth={3}
                       fillOpacity={1}
                       fill="url(#colorViews)"
                     />
                   </AreaChart>
                 ) : (
                   <BarChart data={categoryData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#d9d2c6" opacity={0.2} vertical={false} />
-                    <XAxis dataKey="name" stroke="#667085" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#667085" fontSize={10} tickLine={false} axisLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} vertical={false} />
+                    <XAxis dataKey="name" stroke="var(--text-3)" fontSize={11} tickLine={false} axisLine={false} />
+                    <YAxis stroke="var(--text-3)" fontSize={11} tickLine={false} axisLine={false} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#fffdf8",
-                        border: "1px solid #d9d2c6",
+                        backgroundColor: "var(--surface-3)",
+                        border: "1px solid var(--border-2)",
                         borderRadius: "10px",
-                        fontSize: "11px",
+                        fontSize: "12px",
+                        color: "var(--text)",
                       }}
+                      cursor={{ fill: "var(--surface-2)" }}
+                      itemStyle={{ color: "var(--gold)" }}
                     />
-                    <Bar dataKey="revenue" fill="#c46c42" radius={[4, 4, 0, 0]} barSize={32} />
+                    <Bar dataKey="revenue" fill="#c9a96e" radius={[4, 4, 0, 0]} barSize={40} />
                   </BarChart>
                 )}
               </ResponsiveContainer>
@@ -264,64 +306,87 @@ export default function ManageStaysPage() {
 
       {/* Host Managed Listings Panel */}
       {user.role === "host" && (
-        <div className="bg-white border border-[#d9d2c6]/60 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-[#d9d2c6]/40">
-            <h3 className="text-base font-semibold text-[#111827]">Curated Listings</h3>
-            <p className="text-xs text-[#667085]">Properties matching your host credentials, verified for display.</p>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "14px", overflow: "hidden" }}>
+          <div style={{ padding: "24px 32px", borderBottom: "1px solid var(--border)" }}>
+            <span style={{ display: "inline-block", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "4px" }}>
+              Curated Listings
+            </span>
+            <h3 style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.4rem", fontWeight: 600, color: "var(--text)", margin: 0 }}>Properties Index</h3>
+            <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "var(--text-2)" }}>Properties matching your host credentials, verified for display.</p>
           </div>
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="bg-[#f5f2ea]/40 border-b border-[#d9d2c6]/40 text-[#667085]">
-                  <th className="p-4 font-bold uppercase tracking-wider">Curated Property</th>
-                  <th className="p-4 font-bold uppercase tracking-wider">Location</th>
-                  <th className="p-4 font-bold uppercase tracking-wider">Rate</th>
-                  <th className="p-4 font-bold uppercase tracking-wider">Specifications</th>
-                  <th className="p-4 font-bold uppercase tracking-wider text-right">Curation Actions</th>
+                <tr style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
+                  <th style={{ padding: "16px 32px", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>Curated Property</th>
+                  <th style={{ padding: "16px 32px", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>Location</th>
+                  <th style={{ padding: "16px 32px", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>Rate</th>
+                  <th style={{ padding: "16px 32px", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>Specifications</th>
+                  <th style={{ padding: "16px 32px", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)", textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#d9d2c6]/20">
+              <tbody className="divide-y divide-[var(--border)]">
                 {hostStays.length > 0 ? (
                   hostStays.map((stay) => (
-                    <tr key={stay.slug} className="hover:bg-neutral-50/50 transition-colors">
-                      <td className="p-4 flex items-center gap-3">
-                        <div className="w-12 h-12 bg-neutral-100 rounded-lg relative overflow-hidden shrink-0 border border-[#d9d2c6]/30">
-                          <img
+                    <tr key={stay.slug} style={{ borderBottom: "1px solid var(--border)" }} className="hover:bg-white/5 transition-colors">
+                      <td style={{ padding: "20px 32px", display: "flex", alignItems: "center", gap: 16 }}>
+                        <div style={{ width: 56, height: 56, borderRadius: 10, overflow: "hidden", position: "relative", border: "1px solid var(--border)" }}>
+                          <Image
                             src={`/stay-art/${stay.slug}?scene=cover`}
                             alt={stay.title}
-                            className="w-full h-full object-cover"
+                            fill
+                            style={{ objectFit: "cover" }}
+                            unoptimized
                           />
                         </div>
                         <div>
-                          <strong className="block text-sm text-[#111827]">{stay.title}</strong>
-                          <span className="text-[10px] text-[#667085]">{stay.collection}</span>
+                          <strong style={{ display: "block", color: "var(--text)", fontSize: "0.95rem" }}>{stay.title}</strong>
+                          <span style={{ color: "var(--text-3)", fontSize: "0.75rem" }}>{stay.collection}</span>
                         </div>
                       </td>
-                      <td className="p-4 text-[#111827]">
+                      <td style={{ padding: "20px 32px", color: "var(--text-2)" }}>
                         <span>{stay.location}, {stay.country}</span>
                       </td>
-                      <td className="p-4">
-                        <strong className="text-forest text-sm">${stay.pricePerNight}</strong>
-                        <span className="text-[#667085]"> / night</span>
+                      <td style={{ padding: "20px 32px" }}>
+                        <strong style={{ color: "var(--gold)", fontSize: "1rem" }}>${stay.pricePerNight}</strong>
+                        <span style={{ color: "var(--text-3)", fontSize: "0.8rem" }}> / night</span>
                       </td>
-                      <td className="p-4 text-[#667085]">
+                      <td style={{ padding: "20px 32px", color: "var(--text-3)", fontSize: "0.85rem" }}>
                         <span>{stay.stayType} · {stay.guestCount} guests · {stay.bedrooms} BR</span>
                       </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td style={{ padding: "20px 32px", textAlign: "right" }}>
+                        <div className="flex items-center justify-end gap-3">
                           <Link
                             href={`/stays/${stay.slug}`}
-                            className="px-3 py-1.5 border border-[#d9d2c6] text-[#111827] hover:bg-[#faf9f6] rounded-md font-semibold transition-colors"
+                            style={{
+                              padding: "6px 14px",
+                              border: "1px solid var(--border-2)",
+                              borderRadius: "6px",
+                              fontSize: "0.8rem",
+                              fontWeight: 600,
+                              color: "var(--text-2)",
+                              transition: "all 0.2s"
+                            }}
+                            className="hover:border-[var(--gold)] hover:text-[var(--gold)]"
                           >
                             View details
                           </Link>
                           <button
                             onClick={() => handleDeleteStay(stay.slug, stay.title)}
-                            className="p-1.5 border border-rose-200 text-rose-700 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+                            style={{
+                              padding: "6px",
+                              border: "1px solid rgba(239, 68, 68, 0.2)",
+                              background: "rgba(239, 68, 68, 0.05)",
+                              borderRadius: "6px",
+                              color: "rgb(239, 68, 68)",
+                              cursor: "pointer",
+                              transition: "all 0.2s"
+                            }}
+                            className="hover:bg-red-500/20"
                             type="button"
                             aria-label="Delete curated stay"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -329,8 +394,8 @@ export default function ManageStaysPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-[#667085] italic">
-                      You have no active listings. Click "Add new stay" above to currate your first property.
+                    <td colSpan={5} style={{ padding: "40px", textAlign: "center", color: "var(--text-3)", fontStyle: "italic", fontSize: "0.9rem" }}>
+                      You have no active listings. Click &quot;Add new stay&quot; above to curate your first property.
                     </td>
                   </tr>
                 )}
@@ -341,67 +406,96 @@ export default function ManageStaysPage() {
       )}
 
       {/* Guest/All Bookings Overview Grid */}
-      <div className="bg-white border border-[#d9d2c6]/60 rounded-2xl shadow-sm overflow-hidden" id="bookings">
-        <div className="p-6 border-b border-[#d9d2c6]/40">
-          <h3 className="text-base font-semibold text-[#111827]">My Bookings & Reservations</h3>
-          <p className="text-xs text-[#667085]">Your scheduled travels and active check-in details.</p>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "14px", overflow: "hidden" }} id="bookings">
+        <div style={{ padding: "24px 32px", borderBottom: "1px solid var(--border)" }}>
+          <span style={{ display: "inline-block", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "4px" }}>
+            My Bookings & Reservations
+          </span>
+          <h3 style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.4rem", fontWeight: 600, color: "var(--text)", margin: 0 }}>Reservations Index</h3>
+          <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "var(--text-2)" }}>Your scheduled travels and active check-in details.</p>
         </div>
 
         {bookings.length > 0 ? (
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-5">
             {bookings.map((booking) => (
               <div
                 key={booking.id}
-                className="border border-[#d9d2c6]/60 p-5 rounded-2xl shadow-sm flex flex-col justify-between gap-4 bg-gradient-to-br from-[#faf9f6]/40 to-[#fffdf8]"
+                style={{
+                  border: "1px solid var(--border)",
+                  background: "var(--surface-2)",
+                  padding: "24px",
+                  borderRadius: "12px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "16px"
+                }}
               >
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <h4 className="font-semibold text-sm text-[#111827]">{booking.stayTitle}</h4>
-                    <div className="flex items-center gap-1 text-[10px] text-[#667085] mt-1">
-                      <MapPin size={11} />
+                    <h4 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 600, color: "var(--text)" }}>{booking.stayTitle}</h4>
+                    <div className="flex items-center gap-2 mt-1" style={{ fontSize: "0.8rem", color: "var(--text-3)" }}>
+                      <MapPin size={12} style={{ color: "var(--gold)" }} />
                       <span>{booking.stayLocation}</span>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 text-[9px] uppercase font-mono tracking-wider font-bold rounded bg-emerald-50 text-forest border border-emerald-200/50">
+                  <span style={{
+                    padding: "4px 10px",
+                    fontSize: "0.65rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    fontWeight: 700,
+                    borderRadius: "4px",
+                    background: "rgba(201, 169, 110, 0.15)",
+                    border: "1px solid rgba(201, 169, 110, 0.3)",
+                    color: "var(--gold)"
+                  }}>
                     Confirmed
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 text-xs border-y border-[#d9d2c6]/20 py-3.5 my-1">
-                  <div className="flex items-center gap-2 text-[#667085]">
-                    <Calendar size={13} className="text-forest" />
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "16px",
+                  borderTop: "1px solid var(--border)",
+                  borderBottom: "1px solid var(--border)",
+                  padding: "16px 0",
+                  margin: "4px 0"
+                }}>
+                  <div className="flex items-center gap-3">
+                    <Calendar size={16} style={{ color: "var(--gold)" }} />
                     <div>
-                      <span className="block text-[9px] uppercase font-bold text-[#667085]/60 tracking-wider">Check In</span>
-                      <strong className="text-[#111827] text-[10px]">{booking.checkIn}</strong>
+                      <span style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>Check In</span>
+                      <strong style={{ fontSize: "0.85rem", color: "var(--text)" }}>{booking.checkIn}</strong>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[#667085]">
-                    <Calendar size={13} className="text-forest" />
+                  <div className="flex items-center gap-3">
+                    <Calendar size={16} style={{ color: "var(--gold)" }} />
                     <div>
-                      <span className="block text-[9px] uppercase font-bold text-[#667085]/60 tracking-wider">Check Out</span>
-                      <strong className="text-[#111827] text-[10px]">{booking.checkOut}</strong>
+                      <span style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>Check Out</span>
+                      <strong style={{ fontSize: "0.85rem", color: "var(--text)" }}>{booking.checkOut}</strong>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center text-xs">
-                  <div className="flex items-center gap-1 text-[#667085]">
-                    <Users size={12} />
+                <div className="flex justify-between items-center" style={{ fontSize: "0.85rem" }}>
+                  <div className="flex items-center gap-2" style={{ color: "var(--text-3)" }}>
+                    <Users size={14} style={{ color: "var(--text-3)" }} />
                     <span>{booking.guests} guests reservation</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-[#667085]">Paid: </span>
-                    <strong className="text-forest font-bold">${booking.totalPaid}</strong>
+                    <span style={{ color: "var(--text-3)", fontSize: "0.8rem" }}>Paid: </span>
+                    <strong style={{ color: "var(--text)", fontSize: "1rem" }}>${booking.totalPaid}</strong>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="p-12 text-center text-[#667085] italic text-xs">
+          <div style={{ padding: "64px", textAlign: "center", color: "var(--text-3)", fontStyle: "italic", fontSize: "0.95rem" }}>
             No active reservations found. Visit the{" "}
-            <Link href="/explore" className="text-[#c46c42] font-semibold hover:underline">
+            <Link href="/explore" style={{ color: "var(--gold)", fontWeight: 600, textDecoration: "none" }} className="hover:underline">
               Explore catalog
             </Link>{" "}
             to schedule your first curated journey.

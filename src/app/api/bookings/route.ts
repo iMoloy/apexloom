@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { addBooking, getUserBookings, getStays } from "@/lib/dbStays";
 import { getUserFromRequest } from "@/lib/auth";
+import connectToDatabase from "@/lib/mongoose";
+import { Booking } from "@/models/Booking";
+import { Stay } from "@/models/Stay";
 
 export async function GET(req: NextRequest) {
   const user = getUserFromRequest(req);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
-  const bookings = getUserBookings(user.email);
+  
+  await connectToDatabase();
+  const bookings = await Booking.find({ userEmail: user.email }).sort({ bookedAt: -1 }).lean();
+  
   return NextResponse.json({ bookings });
 }
 
@@ -24,8 +29,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "All booking details are required." }, { status: 400 });
     }
 
-    const stays = getStays();
-    const stay = stays.find((s) => s.slug === staySlug);
+    await connectToDatabase();
+    const stay = await Stay.findOne({ slug: staySlug }).lean();
 
     if (!stay) {
       return NextResponse.json({ error: "Curated stay not found." }, { status: 404 });
@@ -37,7 +42,7 @@ export async function POST(req: NextRequest) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
     const totalPaid = stay.pricePerNight * diffDays + 80; // Standard curation and support fee
 
-    const bookingRecord = {
+    const bookingRecord = new Booking({
       id: `booking-${Date.now()}`,
       staySlug,
       stayTitle: stay.title,
@@ -48,9 +53,9 @@ export async function POST(req: NextRequest) {
       guests: Number(guests),
       totalPaid,
       bookedAt: new Date().toISOString(),
-    };
+    });
 
-    addBooking(bookingRecord);
+    await bookingRecord.save();
 
     return NextResponse.json({ message: "Booking registered successfully.", booking: bookingRecord }, { status: 201 });
   } catch (err) {

@@ -6,96 +6,96 @@ export const metadata = {
   description: "Learn about the mission, values, and curation standards behind the ApexLoom travel platform.",
 };
 
+const pillars = [
+  {
+    icon: <Compass size={20} />,
+    title: "Design & Character",
+    desc: "We look for homes with visual consistency, intentional lighting, and a clear architectural point of view. No sterile, standard layouts.",
+  },
+  {
+    icon: <Shield size={20} />,
+    title: "Honesty & Specifications",
+    desc: "We list the exact details guests rely on: workspace quality, internet stability, noise levels, and host arrival notes. No surprises.",
+  },
+  {
+    icon: <Sparkles size={20} />,
+    title: "Atmosphere First",
+    desc: "Properties must support slow travel — large dining spaces, restful rooms, and walkability rather than tourist rush.",
+  },
+  {
+    icon: <Heart size={20} />,
+    title: "Host Accountability",
+    desc: "Hosts curate their listings with us directly. That relationship builds better communication, accurate photography, and responsive support.",
+  },
+];
+
 export default function AboutPage() {
   return (
-    <main className="max-w-4xl mx-auto px-6 py-16 space-y-12">
-      {/* Header section */}
-      <div className="text-center space-y-3">
-        <span className="text-[10px] tracking-[0.25em] text-[#c46c42] uppercase font-bold">Our Philosophy</span>
-        <h1 className="text-4xl sm:text-5xl font-display font-semibold text-[#111827] tracking-tight">
-          Places that stay with you
+    <main style={{ background: "var(--bg)", minHeight: "100vh" }}>
+      {/* Hero */}
+      <section style={{ maxWidth: 1000, margin: "0 auto", padding: "80px 32px 64px", textAlign: "center" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "5px 14px", border: "1px solid rgba(201,169,110,0.25)", borderRadius: 99, background: "rgba(201,169,110,0.08)", color: "var(--gold)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 24 }}>
+          Our Philosophy
+        </span>
+        <h1 style={{ margin: "0 0 20px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "clamp(2.5rem, 6vw, 4.5rem)", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
+          Places that stay with you.
         </h1>
-        <p className="text-sm text-[#667085] max-w-xl mx-auto leading-relaxed">
+        <p style={{ maxWidth: 580, margin: "0 auto", color: "var(--text-2)", fontSize: "1.05rem", lineHeight: 1.75 }}>
           ApexLoom was founded to bypass the infinite scrolling of generic rental platforms. We focus exclusively on spaces that demonstrate character, atmosphere, and architectural consideration.
         </p>
-      </div>
+      </section>
 
-      {/* Hero Visual Mockup */}
-      <div className="border border-[#d9d2c6]/60 p-8 rounded-2xl bg-white shadow-sm space-y-4">
-        <div className="h-64 sm:h-80 bg-[#1d4d45] rounded-xl flex flex-col justify-between p-8 text-[#fffdf8] relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-96 h-96 bg-[#8fa89d] rounded-full blur-3xl opacity-20 pointer-events-none" />
-          <div className="absolute left-[-10%] bottom-[-10%] w-72 h-72 bg-[#d8cbb7] rounded-full blur-3xl opacity-15 pointer-events-none" />
-          
-          <div className="relative z-10 space-y-1.5 max-w-md">
-            <span className="text-[10px] uppercase tracking-wider opacity-60">Editorial Focus</span>
-            <h2 className="text-2xl sm:text-3xl font-display font-medium leading-tight">We filter the options so you can choose with clarity.</h2>
-          </div>
-          <div className="relative z-10 flex flex-wrap gap-2 mt-auto">
-            <span className="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-[10px] font-mono">Atmosphere</span>
-            <span className="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-[10px] font-mono">Details</span>
-            <span className="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-[10px] font-mono">Clarity</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Core Curation Pillars */}
-      <div className="space-y-6">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-[#111827]">Curation Standards</h3>
-          <p className="text-xs text-[#667085]">The core checks every property on our platform undergoes.</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="bg-white border border-[#d9d2c6]/60 p-6 rounded-xl shadow-sm space-y-3">
-            <div className="p-2 bg-[#1d4d45]/5 text-forest rounded-lg w-fit">
-              <Compass size={18} />
-            </div>
-            <h4 className="text-sm font-semibold text-[#111827]">Design & Character</h4>
-            <p className="text-xs text-[#667085] leading-relaxed">
-              We look for homes with visual consistency, intentional lighting, and a clear architectural point of view. No sterile, standard layouts.
-            </p>
-          </div>
-
-          <div className="bg-white border border-[#d9d2c6]/60 p-6 rounded-xl shadow-sm space-y-3">
-            <div className="p-2 bg-[#c46c42]/5 text-[#c46c42] rounded-lg w-fit">
-              <Shield size={18} />
-            </div>
-            <h4 className="text-sm font-semibold text-[#111827]">Honesty & Specifications</h4>
-            <p className="text-xs text-[#667085] leading-relaxed">
-              We list the exact details guests rely on: workspace quality, internet stability, noise levels, and host arrival notes. No surprises.
-            </p>
-          </div>
-
-          <div className="bg-white border border-[#d9d2c6]/60 p-6 rounded-xl shadow-sm space-y-3">
-            <div className="p-2 bg-[#1d4d45]/5 text-forest rounded-lg w-fit">
-              <Sparkles size={18} />
-            </div>
-            <h4 className="text-sm font-semibold text-[#111827]">Atmosphere First</h4>
-            <p className="text-xs text-[#667085] leading-relaxed">
-              Properties must support slow travel—large dining spaces, restful rooms, and immediate local walkability rather than tourist rush.
-            </p>
-          </div>
-
-          <div className="bg-white border border-[#d9d2c6]/60 p-6 rounded-xl shadow-sm space-y-3">
-            <div className="p-2 bg-[#c46c42]/5 text-[#c46c42] rounded-lg w-fit">
-              <Heart size={18} />
-            </div>
-            <h4 className="text-sm font-semibold text-[#111827]">Considered Hosting</h4>
-            <p className="text-xs text-[#667085] leading-relaxed">
-              Our hosts write detailed neighborhood timing guides, bakery loops, and sunset spots to help guests explore like locals.
-            </p>
+      {/* Editorial Banner */}
+      <section style={{ maxWidth: 1000, margin: "0 auto 80px", padding: "0 32px" }}>
+        <div style={{
+          borderRadius: 14,
+          overflow: "hidden",
+          background: "linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 100%)",
+          border: "1px solid var(--border)",
+          padding: "60px 48px",
+          position: "relative",
+        }}>
+          <div style={{ position: "absolute", top: -40, right: -40, width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
+          <span style={{ display: "block", marginBottom: 14, fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)" }}>
+            Editorial Focus
+          </span>
+          <h2 style={{ margin: "0 0 20px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "clamp(1.8rem, 4vw, 3rem)", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.02em", lineHeight: 1.15, maxWidth: 600 }}>
+            We filter the options so you can choose with clarity.
+          </h2>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            {["Atmosphere", "Details", "Clarity", "Character", "Slow Travel"].map((tag) => (
+              <span key={tag} style={{ padding: "6px 14px", border: "1px solid var(--border-2)", borderRadius: 99, background: "rgba(201,169,110,0.06)", color: "var(--text-2)", fontSize: "0.78rem", fontWeight: 600 }}>
+                {tag}
+              </span>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Vision Statement */}
-      <div className="bg-[#f5f2ea]/40 border border-[#d9d2c6]/60 p-8 rounded-2xl text-center space-y-3">
-        <h3 className="text-sm font-semibold text-[#111827]">Our Long-term Vision</h3>
-        <p className="text-xs text-[#667085] max-w-xl mx-auto leading-relaxed">
-          "ApexLoom isn't about catalog size or listing volume. We believe in curated matching. We want travel planning to feel like turning the pages of an architectural magazine, where every property is a place you actually remember."
-        </p>
-        <span className="block text-[10px] text-[#c46c42] uppercase tracking-wider font-bold">— The ApexLoom Curation Team</span>
-      </div>
+      {/* Pillars */}
+      <section style={{ maxWidth: 1000, margin: "0 auto 80px", padding: "0 32px" }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p style={{ margin: "0 0 10px", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)" }}>Curation Standards</p>
+          <h2 style={{ margin: 0, fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "2rem", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.02em" }}>
+            The core checks every property undergoes.
+          </h2>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}>
+          {pillars.map((pillar) => (
+            <div key={pillar.title} style={{ padding: 28, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,169,110,0.1)", border: "1px solid rgba(201,169,110,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold)", marginBottom: 16 }}>
+                {pillar.icon}
+              </div>
+              <h3 style={{ margin: "0 0 10px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.15rem", fontWeight: 600, color: "var(--text)" }}>
+                {pillar.title}
+              </h3>
+              <p style={{ margin: 0, color: "var(--text-2)", fontSize: "0.875rem", lineHeight: 1.75 }}>
+                {pillar.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

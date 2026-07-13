@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStays, addStay } from "@/lib/dbStays";
 import { getUserFromRequest } from "@/lib/auth";
 import type { StayItem } from "@/data/stays";
+import connectToDatabase from "@/lib/mongoose";
+import { Stay } from "@/models/Stay";
 
 export async function GET(req: NextRequest) {
-  const list = getStays();
+  await connectToDatabase();
+  const list = await Stay.find({}).sort({ publishedOn: -1 }).lean();
   return NextResponse.json({ items: list });
 }
 
@@ -31,6 +33,7 @@ export async function POST(req: NextRequest) {
       bedrooms,
       baths,
       amenities,
+      imageUrl,
     } = data;
 
     if (
@@ -51,9 +54,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "All required specifications must be filled." }, { status: 400 });
     }
 
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    let slug = baseSlug;
+    let counter = 1;
+    
+    await connectToDatabase();
+    
+    while (await Stay.exists({ slug })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
 
-    const newStay: StayItem & { ownerEmail: string } = {
+    const newStay = new Stay({
       slug,
       title,
       location,
@@ -83,9 +95,10 @@ export async function POST(req: NextRequest) {
         },
       ],
       ownerEmail: user.email,
-    };
+      imageUrl,
+    });
 
-    addStay(newStay);
+    await newStay.save();
 
     return NextResponse.json({ message: "Curated stay added successfully.", stay: newStay }, { status: 201 });
   } catch (err) {

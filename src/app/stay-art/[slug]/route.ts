@@ -30,7 +30,7 @@ export async function GET(
   context: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await context.params;
-  const stay = getStayBySlug(slug);
+  const stay = await getStayBySlug(slug);
 
   if (!stay) {
     return new Response("Not found", { status: 404 });

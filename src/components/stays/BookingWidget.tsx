@@ -14,41 +14,54 @@ type BookingWidgetProps = {
 
 type BookingStatus = "idle" | "verifying" | "checking" | "confirming" | "success";
 
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "10px 14px 10px 36px",
+  background: "var(--surface-2)",
+  border: "1px solid var(--border-2)",
+  borderRadius: 8,
+  color: "var(--text)",
+  fontSize: "0.84rem",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  marginBottom: 6,
+  fontSize: "0.68rem",
+  fontWeight: 700,
+  letterSpacing: "0.12em",
+  textTransform: "uppercase",
+  color: "var(--text-3)",
+};
+
 export function BookingWidget({ staySlug, pricePerNight, maxGuests }: BookingWidgetProps) {
   const router = useRouter();
   const { user, showToast } = useApp();
 
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
+  const [checkIn, setCheckIn] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().slice(0, 10);
+  });
+  
+  const [checkOut, setCheckOut] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const leaveDate = new Date();
+    leaveDate.setDate(leaveDate.getDate() + 4);
+    return leaveDate.toISOString().slice(0, 10);
+  });
+  
   const [guests, setGuests] = useState(2);
-  const [nights, setNights] = useState(0);
   const [status, setStatus] = useState<BookingStatus>("idle");
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
 
-  // Seed default dates: check-in tomorrow, check-out in 3 days
-  useEffect(() => {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    const leaveDate = new Date(tomorrow);
-    leaveDate.setDate(tomorrow.getDate() + 3);
-
-    setCheckIn(tomorrow.toISOString().slice(0, 10));
-    setCheckOut(leaveDate.toISOString().slice(0, 10));
-  }, []);
-
-  // Calculate nights
-  useEffect(() => {
-    if (!checkIn || !checkOut) {
-      setNights(0);
-      return;
-    }
-    const d1 = new Date(checkIn);
-    const d2 = new Date(checkOut);
-    const diff = d2.getTime() - d1.getTime();
+  const nights = React.useMemo(() => {
+    if (!checkIn || !checkOut) return 0;
+    const diff = new Date(checkOut).getTime() - new Date(checkIn).getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    setNights(days > 0 ? days : 0);
+    return days > 0 ? days : 0;
   }, [checkIn, checkOut]);
 
   const basePrice = nights * pricePerNight;
@@ -75,7 +88,6 @@ export function BookingWidget({ staySlug, pricePerNight, maxGuests }: BookingWid
       return;
     }
 
-    // Begin simulated progress intervals
     setStatus("verifying");
     setProgress(15);
     setStatusText("Verifying reservation dates...");
@@ -83,11 +95,11 @@ export function BookingWidget({ staySlug, pricePerNight, maxGuests }: BookingWid
     setTimeout(() => {
       setProgress(45);
       setStatusText("Checking room and calendars...");
-      
+
       setTimeout(() => {
         setProgress(75);
         setStatusText("Locking reservation price rates...");
-        
+
         setTimeout(async () => {
           setProgress(100);
           setStatusText("Confirming with curator team...");
@@ -96,26 +108,19 @@ export function BookingWidget({ staySlug, pricePerNight, maxGuests }: BookingWid
             const res = await fetch("/api/bookings", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                staySlug,
-                checkIn,
-                checkOut,
-                guests,
-              }),
+              body: JSON.stringify({ staySlug, checkIn, checkOut, guests }),
             });
 
             if (res.ok) {
               setStatus("success");
               showToast("Reservation confirmed successfully!", "success");
-              setTimeout(() => {
-                router.push("/stays/manage");
-              }, 1200);
+              setTimeout(() => router.push("/stays/manage"), 1200);
             } else {
               const data = await res.json();
               showToast(data.error || "Reservation failed.", "error");
               setStatus("idle");
             }
-          } catch (err) {
+          } catch {
             showToast("Failed to connect to bookings API.", "error");
             setStatus("idle");
           }
@@ -126,137 +131,128 @@ export function BookingWidget({ staySlug, pricePerNight, maxGuests }: BookingWid
 
   if (status !== "idle") {
     return (
-      <div className="bg-white border border-[#d9d2c6]/60 p-6 rounded-2xl shadow-xl flex flex-col justify-center items-center space-y-5 min-h-[300px]">
+      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: 28, borderRadius: 12, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, minHeight: 300 }}>
         {status === "success" ? (
-          <div className="w-12 h-12 rounded-full bg-forest text-[#fffdf8] flex items-center justify-center animate-pulse">
+          <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", display: "flex", alignItems: "center", justifyContent: "center", color: "#22c55e" }}>
             <Check size={24} />
           </div>
         ) : (
-          <div className="relative w-16 h-16 flex items-center justify-center">
-            <div className="absolute border-4 border-[#d9d2c6]/20 border-t-forest rounded-full w-full h-full animate-spin"></div>
-            <span className="text-[10px] font-bold text-forest">{progress}%</span>
+          <div style={{ position: "relative", width: 60, height: 60, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "3px solid var(--border)", borderTopColor: "var(--gold)", animation: "spin 1s linear infinite" }} />
+            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--gold)" }}>{progress}%</span>
           </div>
         )}
-        <div className="text-center space-y-1.5">
-          <h3 className="text-sm font-semibold text-[#111827]">
-            {status === "success" ? "Booking Confirmed" : "Processing Request"}
-          </h3>
-          <p className="text-xs text-[#667085]">{statusText}</p>
+        <div style={{ textAlign: "center" }}>
+          <p style={{ margin: "0 0 6px", fontWeight: 600, color: "var(--text)", fontSize: "0.9rem" }}>
+            {status === "success" ? "Booking Confirmed!" : "Processing Reservation"}
+          </p>
+          <p style={{ margin: 0, color: "var(--text-3)", fontSize: "0.8rem" }}>{statusText}</p>
         </div>
-
-        {/* Static horizontal progress slider bar */}
-        <div className="w-full bg-[#d9d2c6]/30 h-1.5 rounded-full overflow-hidden">
-          <div
-            className="bg-forest h-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
+        <div style={{ width: "100%", height: 3, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, var(--gold), var(--gold-2))", transition: "width 0.4s ease", borderRadius: 99 }} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-[#d9d2c6]/60 p-6 rounded-2xl shadow-xl space-y-5">
-      <div className="flex items-baseline justify-between">
-        <span className="text-xs text-[#667085]">Curated rate</span>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: 24, borderRadius: 12, display: "grid", gap: 20 }}>
+      {/* Price header */}
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", paddingBottom: 18, borderBottom: "1px solid var(--border)" }}>
+        <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)" }}>Curated rate</span>
         <div>
-          <strong className="text-2xl font-display font-semibold text-[#111827]">${pricePerNight}</strong>
-          <span className="text-xs text-[#667085]"> / night</span>
+          <strong style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.8rem", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.02em" }}>${pricePerNight}</strong>
+          <span style={{ color: "var(--text-3)", fontSize: "0.82rem" }}> / night</span>
         </div>
       </div>
 
-      <form onSubmit={handleBooking} className="space-y-4">
-        {/* Date Inputs */}
-        <div className="grid grid-cols-2 gap-2">
-          <label className="block">
-            <span className="text-[9px] text-[#667085] uppercase tracking-wider block mb-1 font-bold">Check In</span>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-[#667085]/60 pointer-events-none">
-                <Calendar size={13} />
-              </span>
-              <input
-                type="date"
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
-                className="w-full pl-7 pr-2 rounded-lg h-9 border border-[#d9d2c6] text-[11px] text-[#111827] focus:border-forest focus:outline-none"
-                required
-              />
+      <form onSubmit={handleBooking} style={{ display: "grid", gap: 16 }}>
+        {/* Dates */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div>
+            <label style={labelStyle}>Check In</label>
+            <div style={{ position: "relative" }}>
+              <Calendar size={13} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", pointerEvents: "none" }} />
+              <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} style={inputStyle} required />
             </div>
-          </label>
-
-          <label className="block">
-            <span className="text-[9px] text-[#667085] uppercase tracking-wider block mb-1 font-bold">Check Out</span>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-[#667085]/60 pointer-events-none">
-                <Calendar size={13} />
-              </span>
-              <input
-                type="date"
-                value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
-                className="w-full pl-7 pr-2 rounded-lg h-9 border border-[#d9d2c6] text-[11px] text-[#111827] focus:border-forest focus:outline-none"
-                required
-              />
+          </div>
+          <div>
+            <label style={labelStyle}>Check Out</label>
+            <div style={{ position: "relative" }}>
+              <Calendar size={13} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", pointerEvents: "none" }} />
+              <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} style={inputStyle} required />
             </div>
-          </label>
+          </div>
         </div>
 
-        {/* Guest Input */}
+        {/* Guests */}
         <div>
-          <span className="text-[9px] text-[#667085] uppercase tracking-wider block mb-1 font-bold">Guests count</span>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-[#667085]/60 pointer-events-none">
-              <Users size={13} />
-            </span>
+          <label style={labelStyle}>Guests</label>
+          <div style={{ position: "relative" }}>
+            <Users size={13} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", pointerEvents: "none" }} />
             <select
               value={guests}
               onChange={(e) => setGuests(Number(e.target.value))}
-              className="w-full pl-7 pr-2 rounded-lg h-9 border border-[#d9d2c6] text-[11px] text-[#111827] focus:border-forest focus:outline-none"
+              style={{ ...inputStyle, appearance: "none" as const }}
             >
               {Array.from({ length: maxGuests }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>
-                  {n} {n === 1 ? "guest" : "guests"}
-                </option>
+                <option key={n} value={n}>{n} {n === 1 ? "guest" : "guests"}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Pricing calculations */}
+        {/* Pricing breakdown */}
         {nights > 0 && (
-          <div className="border-t border-[#d9d2c6]/30 pt-4 space-y-2 text-xs">
-            <div className="flex justify-between text-[#667085]">
-              <span>${pricePerNight} x {nights} nights</span>
-              <span className="font-semibold text-[#111827]">${basePrice}</span>
+          <div style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "16px 0", display: "grid", gap: 10, fontSize: "0.84rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-2)" }}>
+              <span>${pricePerNight} × {nights} nights</span>
+              <span style={{ fontWeight: 600, color: "var(--text)" }}>${basePrice}</span>
             </div>
-            <div className="flex justify-between text-[#667085]">
+            <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-2)" }}>
               <span>Curation verification fee</span>
-              <span className="font-semibold text-[#111827]">${curationFee}</span>
+              <span style={{ fontWeight: 600, color: "var(--text)" }}>${curationFee}</span>
             </div>
-            <div className="flex justify-between text-[#667085]">
-              <span>Cleaning & prep fee</span>
-              <span className="font-semibold text-[#111827]">${cleaningFee}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-2)" }}>
+              <span>Cleaning &amp; prep fee</span>
+              <span style={{ fontWeight: 600, color: "var(--text)" }}>${cleaningFee}</span>
             </div>
-            <div className="border-t border-[#d9d2c6]/30 pt-2 flex justify-between text-[#111827] font-semibold text-sm">
-              <span>Total calculated cost</span>
-              <span className="text-forest font-bold">${totalPrice}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid var(--border)", fontWeight: 700, color: "var(--text)" }}>
+              <span>Total</span>
+              <span style={{ color: "var(--gold)" }}>${totalPrice}</span>
             </div>
           </div>
         )}
 
         <button
           type="submit"
-          className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#1d4d45] hover:bg-[#153832] text-white py-2.5 text-xs font-bold shadow transition-colors cursor-pointer"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            width: "100%",
+            padding: "14px",
+            background: "var(--gold)",
+            color: "var(--bg)",
+            border: "none",
+            borderRadius: 8,
+            fontWeight: 700,
+            fontSize: "0.9rem",
+            cursor: "pointer",
+            transition: "all 0.2s",
+          }}
         >
-          <span>Request Reservation</span>
-          <ArrowRight size={13} />
+          Request Reservation
+          <ArrowRight size={16} />
         </button>
       </form>
 
-      <div className="flex gap-2 p-3 bg-[#f5f2ea]/40 border border-[#d9d2c6]/40 rounded-xl">
-        <Shield size={16} className="text-forest shrink-0 mt-0.5" />
-        <p className="text-[10px] text-[#667085] leading-relaxed">
-          <strong>ApexLoom Verification:</strong> Rates and schedules are secured. Curation fees are fully refunded if your host cancels the reservation.
+      {/* Trust badge */}
+      <div style={{ display: "flex", gap: 10, padding: "14px", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8 }}>
+        <Shield size={15} style={{ color: "var(--gold)", flexShrink: 0, marginTop: 1 }} />
+        <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-3)", lineHeight: 1.6 }}>
+          <strong style={{ color: "var(--text-2)" }}>ApexLoom Verified:</strong> Rates are secured. Curation fees are fully refunded if your host cancels.
         </p>
       </div>
     </div>

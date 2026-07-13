@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { Instagram, Linkedin } from "lucide-react";
 
 export function Footer() {
   return (
@@ -80,9 +81,13 @@ export function Footer() {
         </div>
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} ApexLoom. All rights reserved.</span>
-          <div style={{ display: "flex", gap: 16 }}>
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
-            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+            <a href="https://www.instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
+              <Instagram size={18} />
+            </a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+              <Linkedin size={18} />
+            </a>
           </div>
           <span style={{ color: "var(--gold)", fontWeight: 500 }}>Made for considered travel.</span>
         </div>

@@ -77,14 +77,13 @@ export function Footer() {
             <Link href="/#faq">FAQ</Link>
             <a href="mailto:hello@apexloom.studio">hello@apexloom.studio</a>
           </div>
-          <div className="footer-list">
-            <p className="footer-label">Follow</p>
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
-            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
-          </div>
         </div>
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} ApexLoom. All rights reserved.</span>
+          <div style={{ display: "flex", gap: 16 }}>
+            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
+          </div>
           <span style={{ color: "var(--gold)", fontWeight: 500 }}>Made for considered travel.</span>
         </div>
       </div>

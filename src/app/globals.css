@@ -273,6 +273,16 @@ img {
   font-size: 0.8rem;
 }
 
+.footer-bottom a {
+  color: var(--text-3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-bottom a:hover {
+  color: var(--gold);
+}
+
 /* ============================================================
    LANDING PAGE LAYOUT
    ============================================================ */

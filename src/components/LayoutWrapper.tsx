@@ -2,12 +2,13 @@
 
 import React from "react";
 import { AppProvider, useApp } from "./AppContext";
+import { LiveChatWidget } from "./LiveChatWidget";
 
 function ToastContainer() {
   const { toasts, removeToast } = useApp();
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none max-w-sm w-full">
+    <div className="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none max-w-sm w-full">
       {toasts.map((toast) => {
         let typeClasses = "";
         
@@ -70,6 +71,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     <AppProvider>
       {children}
       <ToastContainer />
+      <LiveChatWidget />
     </AppProvider>
   );
 }

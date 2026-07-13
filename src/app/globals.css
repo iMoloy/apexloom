@@ -1360,3 +1360,48 @@ select {
     flex-direction: column;
   }
 }
+
+/* ==========================================================================
+   ApexLoom Premium UI & Interaction Enhancements
+   ========================================================================== */
+
+/* Human-designed soft glow focus transitions for form components */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--forest) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--forest) 16%, transparent) !important;
+}
+
+input,
+select,
+textarea {
+  transition: border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Micro-interaction scaling for visual clickable anchors */
+.stay-card__action:hover,
+.nav-cta:hover,
+.hero-button:hover {
+  transform: translateY(-1.5px) scale(1.01);
+}
+
+/* CSS Keyframe animations for widgets */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

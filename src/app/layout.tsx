@@ -3,6 +3,7 @@ import { DM_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { LayoutWrapper } from "@/components/LayoutWrapper";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -27,10 +28,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${dmSans.variable} ${fraunces.variable}`}>
       <body>
-        <Navbar />
-        {children}
-        <Footer />
+        <LayoutWrapper>
+          <Navbar />
+          {children}
+          <Footer />
+        </LayoutWrapper>
       </body>
     </html>
   );
 }
+

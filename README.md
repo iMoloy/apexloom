@@ -140,14 +140,19 @@
 
 ---
 
-## 🔗 Resources
-
-- 🐙 **GitHub** → [github.com/iMoloy/apexloom](https://github.com/iMoloy/apexloom)
-- 💼 **Author** → [linkedin.com/in/iMoloy](https://linkedin.com/in/iMoloy)
-
----
-
 <div align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=0:1c130b,50:2d2013,100:0d1117&height=100&section=footer&animation=fadeIn" width="100%" alt="Footer" />
+  
   <sub>Made with ❤️ by <strong>Moloy Krishna Paul</strong></sub>
+  
+  <p>
+    <a href="https://github.com/iMoloy/apexloom" target="_blank">
+      <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white" alt="GitHub" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://linkedin.com/in/iMoloy" target="_blank">
+      <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white" alt="LinkedIn" />
+    </a>
+  </p>
 </div>
+

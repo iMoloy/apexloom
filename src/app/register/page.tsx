@@ -5,8 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppContext";
-import { Mail, Lock, User, UserPlus, ArrowRight } from "lucide-react";
-import { signInWithPopup } from "firebase/auth";
+import { Mail, Lock, User, UserPlus, ArrowRight, Phone } from "lucide-react";
+import { signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth, googleProvider, facebookProvider, twitterProvider, appleProvider } from "@/lib/firebase";
 
 export default function RegisterPage() {
@@ -20,6 +20,14 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Phone Authentication States
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [confirmResult, setConfirmResult] = useState<any>(null);
+  const [phoneLoading, setPhoneLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,6 +112,87 @@ export default function RegisterPage() {
       }
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const initRecaptcha = () => {
+    if (!(window as any).recaptchaVerifier && auth) {
+      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+        size: "invisible",
+        callback: () => {
+          // reCAPTCHA solved
+        }
+      });
+    }
+  };
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneNumber) return;
+    if (!auth) {
+      showToast("Firebase is not configured.", "error");
+      return;
+    }
+
+    setPhoneLoading(true);
+    setError("");
+
+    try {
+      initRecaptcha();
+      const appVerifier = (window as any).recaptchaVerifier;
+      const formatPhone = phoneNumber.startsWith("+") ? phoneNumber : `+880${phoneNumber.replace(/^0/, "")}`;
+      const confirmation = await signInWithPhoneNumber(auth, formatPhone, appVerifier);
+      setConfirmResult(confirmation);
+      setOtpSent(true);
+      showToast("Verification code sent successfully!", "success");
+    } catch (err: any) {
+      setError(err.message || "Failed to send verification code.");
+      showToast("OTP sending failed.", "error");
+      if ((window as any).recaptchaVerifier) {
+        (window as any).recaptchaVerifier.clear();
+        (window as any).recaptchaVerifier = null;
+      }
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode || !confirmResult) return;
+
+    setPhoneLoading(true);
+    setError("");
+
+    try {
+      const result = await confirmResult.confirm(otpCode);
+      const user = result.user;
+
+      const res = await fetch("/api/auth/social-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email || `${user.phoneNumber || user.uid}@phone.com`,
+          name: user.displayName || `Phone User (${user.phoneNumber})`,
+          provider: "phone",
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`Registration complete! Welcome, ${data.user.name}.`, "success");
+        login(data.user);
+        setShowPhoneModal(false);
+        router.push("/");
+      } else {
+        setError(data.error || "Phone verification failed.");
+        showToast("Signup failed.", "error");
+      }
+    } catch (err: any) {
+      setError(err.message || "Invalid verification code.");
+      showToast("Invalid code.", "error");
+    } finally {
+      setPhoneLoading(false);
     }
   };
 
@@ -292,13 +381,9 @@ export default function RegisterPage() {
                   ),
                 },
                 {
-                  type: "apple",
-                  label: "Apple ID",
-                  icon: (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.56 2.95-1.39z"/>
-                    </svg>
-                  ),
+                  type: "phone",
+                  label: "Phone OTP",
+                  icon: <Phone size={14} style={{ color: "var(--gold)" }} />,
                 },
                 {
                   type: "facebook",
@@ -322,7 +407,7 @@ export default function RegisterPage() {
                 <button
                   key={item.type}
                   type="button"
-                  onClick={() => handleSocialLogin(item.type as any)}
+                  onClick={() => item.type === "phone" ? setShowPhoneModal(true) : handleSocialLogin(item.type as any)}
                   disabled={googleLoading || submitting}
                   style={{
                     display: "flex",
@@ -356,6 +441,147 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
+
+      {/* Recaptcha hidden container */}
+      <div id="recaptcha-container"></div>
+
+      {/* Phone OTP Auth Modal */}
+      {showPhoneModal && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(8, 8, 16, 0.85)",
+          backdropFilter: "blur(12px)",
+          zIndex: 999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 20,
+        }}>
+          <div style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 14,
+            width: "100%",
+            maxWidth: 400,
+            padding: 32,
+            position: "relative",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+          }}>
+            <button
+              onClick={() => {
+                setShowPhoneModal(false);
+                setOtpSent(false);
+                setPhoneNumber("");
+                setOtpCode("");
+              }}
+              style={{
+                position: "absolute",
+                top: 20,
+                right: 20,
+                background: "none",
+                border: "none",
+                color: "var(--text-3)",
+                fontSize: "1.2rem",
+                cursor: "pointer",
+              }}
+            >
+              &times;
+            </button>
+
+            <h3 style={{ margin: "0 0 8px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.5rem", fontWeight: 600, color: "var(--text)" }}>
+              {otpSent ? "Enter OTP" : "Phone Login"}
+            </h3>
+            <p style={{ margin: "0 0 24px", color: "var(--text-3)", fontSize: "0.85rem", lineHeight: 1.5 }}>
+              {otpSent ? `We sent a 6-digit verification code to ${phoneNumber}.` : "Authenticate instantly using your mobile number."}
+            </p>
+
+            {!otpSent ? (
+              <form onSubmit={handleSendOtp} style={{ display: "grid", gap: 16 }}>
+                <div>
+                  <label style={{ display: "block", marginBottom: 6, fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)" }}>
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="+88017XXXXXXXX"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      background: "var(--surface-2)",
+                      border: "1px solid var(--border-2)",
+                      borderRadius: 8,
+                      color: "var(--text)",
+                      fontSize: "0.9rem",
+                    }}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={phoneLoading}
+                  style={{
+                    width: "100%",
+                    padding: "13px",
+                    background: phoneLoading ? "var(--surface-3)" : "var(--gold)",
+                    color: phoneLoading ? "var(--text-3)" : "var(--bg)",
+                    border: "none",
+                    borderRadius: 8,
+                    fontWeight: 700,
+                    cursor: phoneLoading ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {phoneLoading ? "Sending OTP..." : "Send Verification Code"}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOtp} style={{ display: "grid", gap: 16 }}>
+                <div>
+                  <label style={{ display: "block", marginBottom: 6, fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)" }}>
+                    Verification Code
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="123456"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      background: "var(--surface-2)",
+                      border: "1px solid var(--border-2)",
+                      borderRadius: 8,
+                      color: "var(--text)",
+                      fontSize: "0.9rem",
+                      textAlign: "center",
+                      letterSpacing: "0.5em",
+                    }}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={phoneLoading}
+                  style={{
+                    width: "100%",
+                    padding: "13px",
+                    background: phoneLoading ? "var(--surface-3)" : "var(--gold)",
+                    color: phoneLoading ? "var(--text-3)" : "var(--bg)",
+                    border: "none",
+                    borderRadius: 8,
+                    fontWeight: 700,
+                    cursor: phoneLoading ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {phoneLoading ? "Verifying..." : "Verify & Sign In"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

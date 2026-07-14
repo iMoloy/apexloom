@@ -3,7 +3,7 @@ import { signToken } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, name, provider } = await req.json();
+    const { email, name, provider, photoURL } = await req.json();
 
     if (!email || !name || !provider) {
       return NextResponse.json({ error: "Missing required profile fields." }, { status: 400 });
@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
       userId: `user-${provider}-${Date.now()}`,
       email,
       name,
+      photoURL,
       role: role as "host" | "guest",
     };
 

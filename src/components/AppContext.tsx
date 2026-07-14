@@ -6,6 +6,7 @@ export interface UserSession {
   userId: string;
   email: string;
   name: string;
+  photoURL?: string;
   role: "host" | "guest";
 }
 
@@ -21,6 +22,7 @@ interface AppContextType {
   toasts: Toast[];
   login: (user: UserSession) => void;
   logout: () => Promise<void>;
+  updateUser: (updates: Partial<UserSession>) => void;
   showToast: (message: string, type?: Toast["type"]) => void;
   removeToast: (id: string) => void;
 }
@@ -41,6 +43,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setToasts((current) => [...current, { id, message, type }]);
     window.setTimeout(() => removeToast(id), 3500);
   }, [removeToast]);
+
+  const updateUser = useCallback((updates: Partial<UserSession>) => {
+    setUser((current) => current ? { ...current, ...updates } : null);
+  }, []);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -74,6 +80,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         toasts,
         login: setUser,
         logout,
+        updateUser,
         showToast,
         removeToast,
       }}

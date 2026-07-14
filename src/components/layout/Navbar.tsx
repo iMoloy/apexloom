@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Menu, X, LogOut, LayoutDashboard, PlusCircle, Bookmark, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useApp } from "@/components/AppContext";
 
@@ -40,12 +41,38 @@ export function Navbar() {
           <BrandLogo />
         </Link>
 
-        <nav className="nav-links" aria-label="Primary navigation">
+        <nav className="nav-links hidden md:flex" aria-label="Primary navigation">
           {links.map((link) => (
             <Link className="nav-link" href={link.href} key={link.label}>
               {link.label}
             </Link>
           ))}
+          {!loadingUser && user && (
+            <>
+              <div style={{ width: 1, height: 24, background: "var(--border)", margin: "0 8px" }} />
+              <Link className="nav-link flex items-center gap-1.5" href="/favorites">
+                <Heart size={14} style={{ color: "var(--gold)" }} />
+                <span>Wishlist</span>
+              </Link>
+              {user.role === "host" ? (
+                <>
+                  <Link className="nav-link flex items-center gap-1.5" href="/stays/manage">
+                    <LayoutDashboard size={14} />
+                    <span>Dashboard</span>
+                  </Link>
+                  <Link className="nav-link flex items-center gap-1.5" href="/stays/add">
+                    <PlusCircle size={14} />
+                    <span>Add stay</span>
+                  </Link>
+                </>
+              ) : (
+                <Link className="nav-link flex items-center gap-1.5" href="/profile">
+                  <Bookmark size={14} />
+                  <span>Bookings</span>
+                </Link>
+              )}
+            </>
+          )}
         </nav>
 
         <div className="nav-actions">
@@ -53,46 +80,21 @@ export function Navbar() {
             <>
               {user ? (
                 <div className="flex items-center gap-3">
-                  <Link
-                    className="nav-link flex items-center gap-1.5"
-                    href="/favorites"
-                  >
-                    <Heart size={14} style={{ color: "var(--gold)" }} />
-                    <span>Wishlist</span>
-                  </Link>
-                  {user.role === "host" ? (
-                    <>
-                      <Link
-                        className="nav-link flex items-center gap-1.5"
-                        href="/stays/manage"
-                      >
-                        <LayoutDashboard size={14} />
-                        <span>Dashboard</span>
-                      </Link>
-                      <Link
-                        className="nav-link flex items-center gap-1.5"
-                        href="/stays/add"
-                      >
-                        <PlusCircle size={14} />
-                        <span>Add stay</span>
-                      </Link>
-                    </>
-                  ) : (
-                    <Link
-                      className="nav-link flex items-center gap-1.5"
-                      href="/profile"
-                    >
-                      <Bookmark size={14} />
-                      <span>Profile & Bookings</span>
-                    </Link>
-                  )}
                   <div className="flex items-center gap-2">
-                    <span
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                      style={{ background: "rgba(201,169,110,0.15)", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.3)" }}
-                    >
-                      {user.name.split(" ").map((n) => n[0]).join("")}
-                    </span>
+                    <Link href="/profile" className="flex-shrink-0" aria-label="Go to profile">
+                      {user.photoURL ? (
+                        <div className="w-8 h-8 rounded-full overflow-hidden border border-[rgba(201,169,110,0.3)] relative">
+                          <Image src={user.photoURL} alt={user.name} fill unoptimized style={{ objectFit: "cover" }} />
+                        </div>
+                      ) : (
+                        <span
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                          style={{ background: "rgba(201,169,110,0.15)", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.3)" }}
+                        >
+                          {user.name.split(" ").map((n) => n[0]).join("")}
+                        </span>
+                      )}
+                    </Link>
                     <button
                       onClick={logout}
                       className="nav-link flex items-center gap-1.5"
@@ -146,7 +148,7 @@ export function Navbar() {
                   </Link>
                 </>
               ) : (
-                <Link href="/stays/manage" onClick={() => setIsOpen(false)}>
+                <Link href="/profile" onClick={() => setIsOpen(false)}>
                   My bookings
                 </Link>
               )}

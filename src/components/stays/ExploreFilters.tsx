@@ -9,6 +9,10 @@ type ExploreFiltersProps = {
   collection: string;
   location: string;
   sort: string;
+  minPrice?: number;
+  maxPrice?: number;
+  checkIn?: string;
+  checkOut?: string;
 };
 
 // Custom Dropdown Component
@@ -91,6 +95,10 @@ export function ExploreFilters({
   collection,
   location,
   sort,
+  minPrice,
+  maxPrice,
+  checkIn,
+  checkOut,
 }: ExploreFiltersProps) {
   
   const sortOptions = [
@@ -103,9 +111,10 @@ export function ExploreFilters({
 
   return (
     <form 
-      className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative z-40 mb-10" 
+      className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative z-40 mb-10 flex flex-col gap-5" 
       action="/explore"
     >
+      {/* Row 1 */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
         
         {/* Search Field */}
@@ -134,7 +143,7 @@ export function ExploreFilters({
         </div>
 
         {/* Location Dropdown */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-3">
           <CustomSelect 
             name="location" 
             value={location} 
@@ -145,13 +154,62 @@ export function ExploreFilters({
         </div>
 
         {/* Sort Dropdown */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-3">
           <CustomSelect 
             name="sort" 
             value={sort} 
             options={sortOptions} 
             placeholder="Sort by"
             icon={<SlidersHorizontal size={14} />}
+          />
+        </div>
+      </div>
+
+      {/* Row 2: Date & Price Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end border-t border-[var(--border-2)] pt-4">
+        {/* Check In Date */}
+        <div className="md:col-span-3 flex flex-col gap-1.5">
+          <label style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)" }}>Check In</label>
+          <input
+            type="date"
+            name="checkIn"
+            defaultValue={checkIn}
+            className="w-full px-4 py-2.5 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] transition-all duration-200 focus:outline-none focus:border-[var(--gold)] focus:shadow-[0_0_0_1px_var(--gold)]"
+          />
+        </div>
+
+        {/* Check Out Date */}
+        <div className="md:col-span-3 flex flex-col gap-1.5">
+          <label style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)" }}>Check Out</label>
+          <input
+            type="date"
+            name="checkOut"
+            defaultValue={checkOut}
+            className="w-full px-4 py-2.5 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] transition-all duration-200 focus:outline-none focus:border-[var(--gold)] focus:shadow-[0_0_0_1px_var(--gold)]"
+          />
+        </div>
+
+        {/* Min Price */}
+        <div className="md:col-span-2 flex flex-col gap-1.5">
+          <label style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)" }}>Min Price ($)</label>
+          <input
+            type="number"
+            name="minPrice"
+            defaultValue={minPrice}
+            placeholder="0"
+            className="w-full px-4 py-2.5 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] transition-all duration-200 focus:outline-none focus:border-[var(--gold)] focus:shadow-[0_0_0_1px_var(--gold)]"
+          />
+        </div>
+
+        {/* Max Price */}
+        <div className="md:col-span-2 flex flex-col gap-1.5">
+          <label style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)" }}>Max Price ($)</label>
+          <input
+            type="number"
+            name="maxPrice"
+            defaultValue={maxPrice}
+            placeholder="1000"
+            className="w-full px-4 py-2.5 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] transition-all duration-200 focus:outline-none focus:border-[var(--gold)] focus:shadow-[0_0_0_1px_var(--gold)]"
           />
         </div>
 
@@ -164,7 +222,6 @@ export function ExploreFilters({
             Apply Filters
           </button>
         </div>
-        
       </div>
     </form>
   );

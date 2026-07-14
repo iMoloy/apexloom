@@ -11,6 +11,8 @@ export interface BookingRecord {
   guests: number;
   totalPaid: number;
   bookedAt: string;
+  status: "confirmed" | "cancelled";
+  imageUrl?: string;
 }
 
 const BookingSchema = new mongoose.Schema({
@@ -24,6 +26,7 @@ const BookingSchema = new mongoose.Schema({
   guests: { type: Number, required: true },
   totalPaid: { type: Number, required: true },
   bookedAt: { type: String, required: true },
+  status: { type: String, enum: ["confirmed", "cancelled"], default: "confirmed" },
 }, {
   timestamps: true,
   collection: "bookings"

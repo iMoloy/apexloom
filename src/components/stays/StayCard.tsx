@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Star, ArrowUpRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MapPin, Star, ArrowUpRight, Heart } from "lucide-react";
+import { useApp } from "@/components/AppContext";
 import type { StayItem } from "@/data/stays";
 import { buildStayArtUrl } from "@/lib/stays";
 
@@ -16,18 +18,104 @@ export const DEFAULT_STAY_IMAGE = "https://images.unsplash.com/photo-16182211957
 
 export function StayCard({ stay, isPreview = false }: StayCardProps) {
   const stars = Math.round(stay.rating);
+  const router = useRouter();
+  const { user, showToast } = useApp();
+  
   const [imgError, setImgError] = useState(false);
   const [prevUrl, setPrevUrl] = useState(stay.imageUrl);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   if (stay.imageUrl !== prevUrl) {
     setPrevUrl(stay.imageUrl);
     setImgError(false);
   }
 
+  useEffect(() => {
+    if (user && !isPreview) {
+      fetch("/api/favorites")
+        .then((res) => res.json())
+        .then((data) => {
+          const items = data.items || [];
+          setIsFavorited(items.some((item: any) => item.slug === stay.slug));
+        })
+        .catch(() => undefined);
+    } else {
+      setIsFavorited(false);
+    }
+  }, [user, stay.slug, isPreview]);
+
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      showToast("Please sign in to add to wishlist.", "warning");
+      router.push(`/login?redirect=/explore`);
+      return;
+    }
+
+    setToggling(true);
+    try {
+      const res = await fetch("/api/favorites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ staySlug: stay.slug }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsFavorited(data.favorited);
+        showToast(data.message, "success");
+      } else {
+        showToast(data.error || "Failed to toggle favorite.", "error");
+      }
+    } catch {
+      showToast("Failed to toggle favorite.", "error");
+    } finally {
+      setToggling(false);
+    }
+  };
+
   return (
     <article className="stay-card">
       {/* ── IMAGE ── */}
       <div className="stay-card__media">
+        {/* Floating Heart Button */}
+        {!isPreview && (
+          <button
+            onClick={handleFavoriteToggle}
+            disabled={toggling}
+            aria-label={isFavorited ? "Remove from wishlist" : "Add to wishlist"}
+            style={{
+              position: "absolute",
+              bottom: 14,
+              left: 14,
+              zIndex: 10,
+              width: 34,
+              height: 34,
+              borderRadius: "50%",
+              background: "rgba(8, 8, 16, 0.75)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: toggling ? "not-allowed" : "pointer",
+              color: isFavorited ? "#ef4444" : "var(--text-3)",
+              transition: "all 0.2s ease-in-out",
+            }}
+            onMouseEnter={(e) => {
+              if (!isFavorited) e.currentTarget.style.color = "var(--text)";
+              e.currentTarget.style.transform = "scale(1.1)";
+            }}
+            onMouseLeave={(e) => {
+              if (!isFavorited) e.currentTarget.style.color = "var(--text-3)";
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+          >
+            <Heart size={16} fill={isFavorited ? "#ef4444" : "none"} />
+          </button>
+        )}
+
         {/* Gradient overlay for readability */}
         <div style={{
           position: "absolute",

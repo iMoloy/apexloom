@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, LogOut, LayoutDashboard, PlusCircle, Bookmark } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, PlusCircle, Bookmark, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useApp } from "@/components/AppContext";
@@ -53,6 +53,13 @@ export function Navbar() {
             <>
               {user ? (
                 <div className="flex items-center gap-3">
+                  <Link
+                    className="nav-link flex items-center gap-1.5"
+                    href="/favorites"
+                  >
+                    <Heart size={14} style={{ color: "var(--gold)" }} />
+                    <span>Wishlist</span>
+                  </Link>
                   {user.role === "host" ? (
                     <>
                       <Link
@@ -126,6 +133,9 @@ export function Navbar() {
           ))}
           {user ? (
             <>
+              <Link href="/favorites" onClick={() => setIsOpen(false)}>
+                Wishlist
+              </Link>
               {user.role === "host" ? (
                 <>
                   <Link href="/stays/manage" onClick={() => setIsOpen(false)}>

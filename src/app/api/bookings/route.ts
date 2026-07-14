@@ -13,7 +13,18 @@ export async function GET(req: NextRequest) {
   await connectToDatabase();
   const bookings = await Booking.find({ userEmail: user.email }).sort({ bookedAt: -1 }).lean();
   
-  return NextResponse.json({ bookings });
+  // Attach stay imageUrl to each booking record
+  const bookingsWithImages = await Promise.all(
+    bookings.map(async (booking) => {
+      const stay = await Stay.findOne({ slug: booking.staySlug }, "imageUrl").lean();
+      return {
+        ...booking,
+        imageUrl: stay?.imageUrl || "",
+      };
+    })
+  );
+  
+  return NextResponse.json({ bookings: bookingsWithImages });
 }
 
 export async function POST(req: NextRequest) {
@@ -53,6 +64,7 @@ export async function POST(req: NextRequest) {
       guests: Number(guests),
       totalPaid,
       bookedAt: new Date().toISOString(),
+      status: "confirmed",
     });
 
     await bookingRecord.save();

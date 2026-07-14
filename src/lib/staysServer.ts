@@ -1,5 +1,6 @@
 import connectToDatabase from "./mongoose";
 import { Stay } from "@/models/Stay";
+import { Booking } from "@/models/Booking";
 import { type StayItem, stayItems } from "@/data/stays";
 import type { ExploreQuery, ExploreResult } from "./stays";
 
@@ -52,10 +53,37 @@ export async function filterAndPaginateStays({
   sort = "featured",
   page = 1,
   pageSize = 8,
+  minPrice,
+  maxPrice,
+  checkIn = "",
+  checkOut = "",
 }: ExploreQuery): Promise<ExploreResult> {
   await seedDefaultStays();
   
   const query: any = {};
+
+  // Price Range Filter
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    query.pricePerNight = {};
+    if (minPrice !== undefined) {
+      query.pricePerNight.$gte = Number(minPrice);
+    }
+    if (maxPrice !== undefined) {
+      query.pricePerNight.$lte = Number(maxPrice);
+    }
+  }
+
+  // Date Availability Filter
+  if (checkIn && checkOut) {
+    const overlappingBookings = await Booking.find({
+      status: { $ne: "cancelled" },
+      checkIn: { $lt: checkOut },
+      checkOut: { $gt: checkIn }
+    }, "staySlug").lean();
+
+    const bookedStaySlugs = overlappingBookings.map(b => b.staySlug);
+    query.slug = { $nin: bookedStaySlugs };
+  }
 
   if (collection) {
     query.collection = new RegExp(`^${collection}$`, 'i');

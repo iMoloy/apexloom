@@ -11,6 +11,10 @@ type ExplorePageProps = {
     location?: string;
     sort?: string;
     page?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    checkIn?: string;
+    checkOut?: string;
   }>;
 };
 
@@ -26,6 +30,10 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const currentLocation = resolvedParams.location ?? "";
   const currentSort = resolvedParams.sort ?? "featured";
   const currentPage = Number(resolvedParams.page ?? "1") || 1;
+  const currentMinPrice = resolvedParams.minPrice ? Number(resolvedParams.minPrice) : undefined;
+  const currentMaxPrice = resolvedParams.maxPrice ? Number(resolvedParams.maxPrice) : undefined;
+  const currentCheckIn = resolvedParams.checkIn ?? "";
+  const currentCheckOut = resolvedParams.checkOut ?? "";
 
   const result = await filterAndPaginateStays({
     search: currentSearch,
@@ -33,6 +41,10 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     location: currentLocation,
     sort: currentSort,
     page: currentPage,
+    minPrice: currentMinPrice,
+    maxPrice: currentMaxPrice,
+    checkIn: currentCheckIn,
+    checkOut: currentCheckOut,
   });
 
   return (
@@ -46,7 +58,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         </p>
         <div className="catalog-hero__strip">
           <span>8 editorial stays live</span>
-          <span>2 filters + sorting + pagination</span>
+          <span>Date availability + price filters live</span>
           <span>Public details on every listing</span>
         </div>
       </section>
@@ -57,6 +69,10 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
           location={currentLocation}
           search={currentSearch}
           sort={currentSort}
+          minPrice={currentMinPrice}
+          maxPrice={currentMaxPrice}
+          checkIn={currentCheckIn}
+          checkOut={currentCheckOut}
         />
 
         <div className="catalog-results">
@@ -79,6 +95,10 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
               collection: currentCollection || undefined,
               location: currentLocation || undefined,
               sort: currentSort || undefined,
+              minPrice: resolvedParams.minPrice || undefined,
+              maxPrice: resolvedParams.maxPrice || undefined,
+              checkIn: resolvedParams.checkIn || undefined,
+              checkOut: resolvedParams.checkOut || undefined,
             }}
             totalPages={result.totalPages}
           />

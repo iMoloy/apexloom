@@ -7,6 +7,10 @@ export type ExploreQuery = {
   sort?: string;
   page?: number;
   pageSize?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  checkIn?: string;
+  checkOut?: string;
 };
 
 export type ExploreResult = {

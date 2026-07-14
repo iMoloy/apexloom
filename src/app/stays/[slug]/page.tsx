@@ -8,6 +8,7 @@ import { buildStayArtUrl } from "@/lib/stays";
 import { getRelatedStays, getStayBySlug } from "@/lib/staysServer";
 import { BookingWidget } from "@/components/stays/BookingWidget";
 import { StayGallery } from "@/components/stays/StayGallery";
+import { StayReviews } from "@/components/stays/StayReviews";
 
 type StayDetailsPageProps = {
   params: Promise<{ slug: string }>;
@@ -123,48 +124,7 @@ export default async function StayDetailsPage({ params }: StayDetailsPageProps) 
           </div>
 
           {/* Reviews */}
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: 32 }}>
-            <p style={{ margin: "0 0 6px", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--gold)", display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ width: 16, height: 1, background: "var(--gold)", display: "inline-block" }} />
-              Guest notes
-            </p>
-            <h2 style={{ margin: "0 0 20px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.6rem", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.02em" }}>
-              Recent reviews
-            </h2>
-            <div style={{ display: "grid", gap: 14 }}>
-              {stay.reviews.map((review) => (
-                <div
-                  key={review.author}
-                  style={{ padding: "20px 22px", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10 }}
-                >
-                  {/* Author row */}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      {/* Avatar */}
-                      <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(201,169,110,0.12)", border: "1px solid rgba(201,169,110,0.25)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold)", fontWeight: 700, fontSize: "0.84rem", flexShrink: 0 }}>
-                        {review.author.split(" ").map((n) => n[0]).join("")}
-                      </div>
-                      <div>
-                        <p style={{ margin: 0, fontWeight: 600, color: "var(--text)", fontSize: "0.9rem" }}>{review.author}</p>
-                        <p style={{ margin: 0, color: "var(--text-3)", fontSize: "0.75rem" }}>{review.role}</p>
-                      </div>
-                    </div>
-                    {/* Stars */}
-                    <div style={{ display: "flex", gap: 2 }}>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <svg key={i} width="12" height="12" viewBox="0 0 20 20" style={{ fill: i < review.rating ? "#c9a96e" : "var(--border-2)" }}>
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                  </div>
-                  <p style={{ margin: 0, color: "var(--text-2)", fontSize: "0.875rem", lineHeight: 1.75, fontStyle: "italic" }}>
-                    &ldquo;{review.quote}&rdquo;
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <StayReviews initialReviews={stay.reviews} staySlug={stay.slug} />
         </div>
 
         {/* RIGHT — Sticky sidebar */}

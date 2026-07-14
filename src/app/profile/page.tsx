@@ -56,10 +56,32 @@ export default function ProfilePage() {
     );
   }
 
-  // Determine active vs past bookings based on dates
-  // (In this demo, we'll treat all as upcoming for simplicity)
-  const upcomingBookings = bookings.slice(0, 2); 
-  const pastBookings = bookings.slice(2);
+  const handleCancelBooking = async (bookingId: string) => {
+    const confirmCancel = window.confirm("Are you sure you want to cancel this reservation?");
+    if (!confirmCancel) return;
+
+    try {
+      const res = await fetch("/api/bookings/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId }),
+      });
+
+      if (res.ok) {
+        showToast("Booking cancelled successfully.", "success");
+        setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: "cancelled" } : b));
+      } else {
+        const data = await res.json();
+        showToast(data.error || "Failed to cancel booking.", "error");
+      }
+    } catch {
+      showToast("Failed to connect to cancellations API.", "error");
+    }
+  };
+
+  const now = new Date().toISOString().slice(0, 10);
+  const upcomingBookings = bookings.filter(b => b.checkOut >= now);
+  const pastBookings = bookings.filter(b => b.checkOut < now);
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-16 flex-grow w-full">
@@ -120,22 +142,39 @@ export default function ProfilePage() {
           {upcomingBookings.length > 0 ? (
             <div className="space-y-4">
               {upcomingBookings.map(booking => (
-                <div key={booking.id} style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: "24px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "14px", overflow: "hidden" }}>
+                <div key={booking.id} style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: "24px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "14px", overflow: "hidden", opacity: booking.status === "cancelled" ? 0.6 : 1 }}>
                   <div style={{ position: "relative", height: "100%", minHeight: "180px", background: "var(--surface-2)" }}>
-                    {/* Fallback pattern since we don't store slug in booking for demo */}
-                    <div style={{ position: "absolute", inset: 0, opacity: 0.2, background: "linear-gradient(45deg, var(--gold) 0%, transparent 100%)" }} />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Home size={32} style={{ color: "var(--gold)", opacity: 0.5 }} />
-                    </div>
+                    {booking.imageUrl ? (
+                      <Image
+                        src={booking.imageUrl}
+                        alt={booking.stayTitle}
+                        fill
+                        unoptimized
+                        style={{ objectFit: "cover" }}
+                      />
+                    ) : (
+                      <>
+                        <div style={{ position: "absolute", inset: 0, opacity: 0.2, background: "linear-gradient(45deg, var(--gold) 0%, transparent 100%)" }} />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Home size={32} style={{ color: "var(--gold)", opacity: 0.5 }} />
+                        </div>
+                      </>
+                    )}
                   </div>
                   
                   <div style={{ padding: "24px 24px 24px 0", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <div>
                       <div className="flex justify-between items-start mb-2">
                         <h3 style={{ margin: 0, fontSize: "1.25rem", fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 600, color: "var(--text)" }}>{booking.stayTitle}</h3>
-                        <span style={{ padding: "4px 10px", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700, borderRadius: "4px", background: "rgba(201, 169, 110, 0.15)", border: "1px solid rgba(201, 169, 110, 0.3)", color: "var(--gold)" }}>
-                          Confirmed
-                        </span>
+                        {booking.status === "cancelled" ? (
+                          <span style={{ padding: "4px 10px", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700, borderRadius: "4px", background: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.25)", color: "#fca5a5" }}>
+                            Cancelled
+                          </span>
+                        ) : (
+                          <span style={{ padding: "4px 10px", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700, borderRadius: "4px", background: "rgba(34, 197, 94, 0.12)", border: "1px solid rgba(34, 197, 94, 0.25)", color: "#4ade80" }}>
+                            Confirmed
+                          </span>
+                        )}
                       </div>
                       <p style={{ display: "flex", alignItems: "center", gap: "6px", margin: "0 0 16px", color: "var(--text-3)", fontSize: "0.85rem" }}>
                         <MapPin size={14} style={{ color: "var(--gold)" }} />
@@ -143,17 +182,46 @@ export default function ProfilePage() {
                       </p>
                     </div>
 
-                    <div style={{ display: "flex", gap: "32px", borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
-                      <div>
-                        <span style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "2px" }}>Dates</span>
-                        <strong style={{ fontSize: "0.9rem", color: "var(--text)" }}>{booking.checkIn} — {booking.checkOut}</strong>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
+                      <div style={{ display: "flex", gap: "32px" }}>
+                        <div>
+                          <span style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "2px" }}>Dates</span>
+                          <strong style={{ fontSize: "0.9rem", color: "var(--text)" }}>{booking.checkIn} — {booking.checkOut}</strong>
+                        </div>
+                        <div>
+                          <span style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "2px" }}>Guests</span>
+                          <strong style={{ fontSize: "0.9rem", color: "var(--text)", display: "flex", alignItems: "center", gap: 6 }}>
+                            <Users size={14} /> {booking.guests}
+                          </strong>
+                        </div>
                       </div>
-                      <div>
-                        <span style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)", marginBottom: "2px" }}>Guests</span>
-                        <strong style={{ fontSize: "0.9rem", color: "var(--text)", display: "flex", alignItems: "center", gap: 6 }}>
-                          <Users size={14} /> {booking.guests}
-                        </strong>
-                      </div>
+                      
+                      {booking.status === "confirmed" && (
+                        <button
+                          onClick={() => handleCancelBooking(booking.id)}
+                          style={{
+                            padding: "6px 14px",
+                            background: "rgba(239, 68, 68, 0.05)",
+                            border: "1px solid rgba(239, 68, 68, 0.3)",
+                            borderRadius: 8,
+                            color: "#fca5a5",
+                            fontSize: "0.78rem",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
+                            e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.6)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "rgba(239, 68, 68, 0.05)";
+                            e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)";
+                          }}
+                        >
+                          Cancel Trip
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -175,12 +243,14 @@ export default function ProfilePage() {
               </h2>
               <div className="space-y-3">
                 {pastBookings.map(booking => (
-                  <div key={booking.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "10px", padding: "16px 24px" }}>
+                  <div key={booking.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "10px", padding: "16px 24px", opacity: booking.status === "cancelled" ? 0.6 : 1 }}>
                     <div>
                       <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 600, color: "var(--text-2)" }}>{booking.stayTitle}</h4>
                       <p style={{ margin: "2px 0 0", color: "var(--text-3)", fontSize: "0.75rem" }}>{booking.stayLocation} · {booking.checkIn}</p>
                     </div>
-                    <span style={{ fontSize: "0.8rem", color: "var(--text-3)" }}>Completed</span>
+                    <span style={{ fontSize: "0.8rem", color: booking.status === "cancelled" ? "#fca5a5" : "var(--text-3)" }}>
+                      {booking.status === "cancelled" ? "Cancelled" : "Completed"}
+                    </span>
                   </div>
                 ))}
               </div>

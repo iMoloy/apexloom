@@ -14,6 +14,7 @@ export type CollectionCard = {
   description: string;
   highlights: string[];
   tone: "forest" | "clay" | "paper";
+  imageUrl?: string;
 };
 
 export type JourneyStep = {
@@ -31,6 +32,7 @@ export type JournalEntry = {
   title: string;
   description: string;
   meta: string;
+  imageUrl?: string;
 };
 
 export type FaqItem = {
@@ -72,6 +74,7 @@ export const collections: CollectionCard[] = [
     description:
       "Well-located apartments and townhouses where you can stay close to the pulse without losing the calm.",
     highlights: ["Walkable neighborhoods", "Dedicated work corners", "Flexible self check-in"],
+    imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
   },
   {
     tone: "clay",
@@ -79,6 +82,7 @@ export const collections: CollectionCard[] = [
     description:
       "Warm countryside homes made for long breakfasts, outdoor dinners, and a proper reset from routine.",
     highlights: ["Fire pits and gardens", "Small group friendly", "Seasonal host guides"],
+    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
   },
   {
     tone: "paper",
@@ -86,6 +90,7 @@ export const collections: CollectionCard[] = [
     description:
       "Statement spaces for milestone trips, creative breaks, and gatherings where the setting really matters.",
     highlights: ["Architectural character", "Private dining options", "Concierge-ready stays"],
+    imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
   },
 ];
 
@@ -141,18 +146,21 @@ export const journalEntries: JournalEntry[] = [
     title: "How to choose a city stay that still gives you breathing room",
     description:
       "A practical guide to balancing access, quiet, and day-to-day comfort when you do not want the usual hotel rhythm.",
+    imageUrl: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80",
   },
   {
     meta: "Journal 02",
     title: "What thoughtful hosts reveal before great trips begin",
     description:
       "The small pieces of information that build trust early, from arrival windows to workspace honesty and neighborhood timing.",
+    imageUrl: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
   },
   {
     meta: "Journal 03",
     title: "Three ways design changes how long you actually want to stay",
     description:
       "Why layout, light, and material choices shape a stay more than square footage or standard amenity lists.",
+    imageUrl: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=800&q=80",
   },
 ];
 

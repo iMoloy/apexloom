@@ -1,3 +1,7 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, ArrowUpRight, Star, MapPin, TrendingUp, Users, Home, Award } from "lucide-react";
 import { StayGrid } from "@/components/stays/StayGrid";
 import {
@@ -9,24 +13,49 @@ import {
   journeySteps,
   testimonials,
 } from "@/data/home";
-import { getFeaturedStays } from "@/lib/staysServer";
+import type { StayItem } from "@/data/stays";
 
-export async function HomeLanding() {
-  // Fetch featured stays from our local "database"
-  const featuredStays = await getFeaturedStays();
+export function HomeLanding({ featuredStays }: { featuredStays: StayItem[] }) {
 
   return (
-    <main>
+    <main style={{ overflow: "hidden" }}>
+      {/* Dynamic Keyframe Animation Styles */}
+      <style>{`
+        @keyframes pan-zoom {
+          0% { transform: scale(1); }
+          100% { transform: scale(1.08); }
+        }
+      `}</style>
+
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section 
         className="hero-grid"
         style={{
-          backgroundImage: "linear-gradient(to right, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.4) 100%), url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')",
-          backgroundSize: "cover",
-          backgroundPosition: "center"
+          position: "relative",
+          overflow: "hidden",
+          background: "var(--bg)",
         }}
       >
-        <div className="hero-panel" style={{ background: "transparent" }}>
+        {/* Ken Burns Dynamic Background Image */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          animation: "pan-zoom 20s ease-in-out infinite alternate",
+          zIndex: 0,
+        }} />
+
+        {/* Gradient Overlay for Readability */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(to right, rgba(8,8,16,0.98) 0%, rgba(8,8,16,0.65) 50%, rgba(8,8,16,0.3) 100%)",
+          zIndex: 1,
+        }} />
+
+        <div className="hero-panel" style={{ background: "transparent", position: "relative", zIndex: 2 }}>
           <div>
             <div className="hero-ribbon">
               <span className="hero-ribbon__tag">Premium Selection</span>
@@ -47,10 +76,10 @@ export async function HomeLanding() {
             </div>
 
             <div className="hero-actions">
-              <a className="hero-button" href="/explore">
+              <Link className="hero-button" href="/explore">
                 Explore properties
                 <ArrowRight size={16} aria-hidden="true" />
-              </a>
+              </Link>
               <a className="text-link" href="#collections">
                 View collections <ArrowUpRight size={16} aria-hidden="true" />
               </a>
@@ -70,12 +99,13 @@ export async function HomeLanding() {
         </div>
 
         {/* Right Panel — Stats & Property Showcase */}
-        <div className="hero-aside">
+        <div className="hero-aside" style={{ position: "relative", zIndex: 2 }}>
           {/* Live property card mock */}
           <div style={{
             border: "1px solid var(--border-2)",
             borderRadius: "12px",
-            background: "var(--surface-2)",
+            background: "rgba(18, 18, 29, 0.85)",
+            backdropFilter: "blur(12px)",
             padding: "20px",
           }}>
             <div className="flex justify-between items-center mb-4">
@@ -141,7 +171,8 @@ export async function HomeLanding() {
                 borderRadius: "10px",
                 padding: "16px 12px",
                 textAlign: "center",
-                background: "var(--surface)",
+                background: "rgba(12, 12, 22, 0.8)",
+                backdropFilter: "blur(8px)",
               }}>
                 <strong style={{ display: "block", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.4rem", fontWeight: 600, color: "var(--gold)", letterSpacing: "-0.02em", lineHeight: 1 }}>
                   {metric.value}
@@ -190,9 +221,9 @@ export async function HomeLanding() {
             <p className="section-copy" style={{ marginBottom: 16 }}>
               Every property in our catalog has been reviewed for atmosphere, accuracy, and the details that determine whether a trip goes well.
             </p>
-            <a className="text-link" href="/explore" style={{ fontWeight: 700 }}>
+            <Link className="text-link" href="/explore" style={{ fontWeight: 700 }}>
               View all properties <ArrowRight size={16} aria-hidden="true" />
-            </a>
+            </Link>
           </div>
         </div>
         <StayGrid items={featuredStays} />
@@ -205,7 +236,7 @@ export async function HomeLanding() {
           <h2>A travel platform shaped by taste, not volume.</h2>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
           {[
             {
               icon: <Home size={22} />,
@@ -228,7 +259,25 @@ export async function HomeLanding() {
           ].map((card) => (
             <div
               key={card.title}
-              className="story-card"
+              className="group"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 14,
+                padding: 32,
+                transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+                cursor: "default",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "var(--gold)";
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow = "0 12px 32px rgba(201,169,110,0.06)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
             >
               <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,169,110,0.1)", border: "1px solid rgba(201,169,110,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold)", marginBottom: 20 }}>
                 {card.icon}
@@ -258,23 +307,79 @@ export async function HomeLanding() {
             Rather than sorting through endless inventory, ApexLoom groups spaces by rhythm, setting, and how the stay is meant to feel.
           </p>
         </div>
-        <div className="collection-grid">
+        <div className="collection-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
           {collections.map((collection) => (
-            <article
+            <Link
+              href={`/explore?collection=${encodeURIComponent(collection.title)}`}
               key={collection.title}
-              className="collection-card"
+              className="group"
+              style={{
+                position: "relative",
+                height: 420,
+                borderRadius: 14,
+                overflow: "hidden",
+                border: "1px solid var(--border)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                padding: 32,
+                cursor: "pointer",
+                textDecoration: "none",
+              }}
             >
-              <span style={{ display: "block", marginBottom: 12, fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)" }}>
-                {collection.tone === "forest" ? "Urban" : collection.tone === "clay" ? "Slow Travel" : "Design"}
-              </span>
-              <h3>{collection.title}</h3>
-              <p>{collection.description}</p>
-              <ul>
-                {collection.highlights.map((highlight) => (
-                  <li key={highlight}>{highlight}</li>
-                ))}
-              </ul>
-            </article>
+              {/* Background Image */}
+              <div 
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage: `url('${collection.imageUrl}')`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+                  zIndex: 0,
+                }} 
+                className="group-hover:scale-105" 
+              />
+              
+              {/* Dark Gradient Overlay */}
+              <div style={{
+                position: "absolute",
+                inset: 0,
+                background: "linear-gradient(to top, rgba(8,8,16,0.98) 0%, rgba(8,8,16,0.65) 50%, rgba(8,8,16,0.15) 100%)",
+                zIndex: 1,
+              }} />
+
+              {/* Text Content */}
+              <div style={{ position: "relative", zIndex: 2, display: "grid", gap: 12 }}>
+                <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)" }}>
+                  {collection.tone === "forest" ? "Urban" : collection.tone === "clay" ? "Slow Travel" : "Design"}
+                </span>
+                <h3 style={{ margin: 0, fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.45rem", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.01em" }}>
+                  {collection.title}
+                </h3>
+                <p style={{ margin: 0, color: "var(--text-2)", fontSize: "0.86rem", lineHeight: 1.55 }}>
+                  {collection.description}
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                  {collection.highlights.map((highlight) => (
+                    <span 
+                      key={highlight} 
+                      style={{ 
+                        padding: "4px 10px", 
+                        background: "rgba(201,169,110,0.12)", 
+                        border: "1px solid rgba(201,169,110,0.25)", 
+                        borderRadius: 6, 
+                        color: "var(--gold)", 
+                        fontSize: "0.72rem", 
+                        fontWeight: 600 
+                      }}
+                    >
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -290,12 +395,48 @@ export async function HomeLanding() {
             Read the FAQ <ArrowRight size={16} aria-hidden="true" />
           </a>
         </div>
-        <div className="journey-grid">
+        <div className="journey-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
           {journeySteps.map((step, index) => (
-            <article className="journey-card" key={step.title}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
+            <article 
+              className="group" 
+              key={step.title}
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 14,
+                padding: 32,
+                position: "relative",
+                overflow: "hidden",
+                transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "var(--gold)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+              }}
+            >
+              <span
+                style={{
+                  display: "block",
+                  fontFamily: "var(--font-playfair), Georgia, serif",
+                  fontSize: "3.5rem",
+                  fontWeight: 700,
+                  color: "rgba(201,169,110,0.08)",
+                  lineHeight: 1,
+                  marginBottom: 16,
+                  transition: "color 0.3s ease, transform 0.3s ease",
+                }}
+                className="group-hover:text-[rgba(201,169,110,0.22)] group-hover:scale-105"
+              >
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3 style={{ margin: "0 0 12px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.25rem", fontWeight: 600, color: "var(--text)" }}>
+                {step.title}
+              </h3>
+              <p style={{ margin: 0, color: "var(--text-3)", fontSize: "0.86rem", lineHeight: 1.65 }}>
+                {step.description}
+              </p>
             </article>
           ))}
         </div>
@@ -336,12 +477,59 @@ export async function HomeLanding() {
             Editorial pieces help guests choose better stays and help hosts understand what thoughtful presentation looks like.
           </p>
         </div>
-        <div className="journal-grid">
+        <div className="journal-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
           {journalEntries.map((entry) => (
-            <article className="journal-card" key={entry.title}>
-              <span>{entry.meta}</span>
-              <h3>{entry.title}</h3>
-              <p>{entry.description}</p>
+            <article 
+              className="group" 
+              key={entry.title}
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 14,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                cursor: "pointer",
+                transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "var(--gold)";
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow = "0 12px 32px rgba(201,169,110,0.06)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              {/* Journal Cover Image */}
+              <div style={{ position: "relative", height: 210, width: "100%", overflow: "hidden" }}>
+                <Image
+                  src={entry.imageUrl || ""}
+                  alt={entry.title}
+                  fill
+                  unoptimized
+                  style={{ objectFit: "cover", transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)" }}
+                  className="group-hover:scale-105"
+                />
+                <span style={{ position: "absolute", top: 16, left: 16, zIndex: 10, padding: "5px 10px", background: "rgba(8,8,16,0.85)", backdropFilter: "blur(6px)", border: "1px solid var(--border-2)", borderRadius: 6, fontSize: "0.68rem", fontWeight: 700, color: "var(--gold)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                  {entry.meta}
+                </span>
+              </div>
+
+              {/* Journal Body */}
+              <div style={{ padding: 24, display: "grid", gap: 10 }}>
+                <h3 style={{ margin: 0, fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.2rem", fontWeight: 600, color: "var(--text)", lineHeight: 1.45 }}>
+                  {entry.title}
+                </h3>
+                <p style={{ margin: 0, color: "var(--text-3)", fontSize: "0.85rem", lineHeight: 1.6 }}>
+                  {entry.description}
+                </p>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--gold)", fontSize: "0.8rem", fontWeight: 700, marginTop: 8 }}>
+                  Read Article <ArrowRight size={14} />
+                </div>
+              </div>
             </article>
           ))}
         </div>

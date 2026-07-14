@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useApp } from "@/components/AppContext";
 import { Mail, MapPin, Send, MessageSquare } from "lucide-react";
 
@@ -127,12 +128,45 @@ export default function ContactPage() {
 
           {/* Info sidebar */}
           <div style={{ display: "grid", gap: 16 }}>
+            {/* Visual Lisbon HQ Anchor */}
+            <div style={{ position: "relative", height: 200, borderRadius: 12, overflow: "hidden", border: "1px solid var(--border)", marginBottom: 4 }}>
+              <Image
+                src="https://images.unsplash.com/photo-1577412647305-991150c7d163?auto=format&fit=crop&w=800&q=80"
+                alt="Lisbon Editorial Headquarters"
+                fill
+                unoptimized
+                style={{ objectFit: "cover" }}
+              />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(8,8,16,0.92) 0%, transparent 100%)" }} />
+              <span style={{ position: "absolute", bottom: 16, left: 16, fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)" }}>
+                Lisbon HQ Curation Room
+              </span>
+            </div>
+
             {[
               { icon: <Mail size={18} />, label: "Email us", value: "hello@apexloom.studio", sub: "We reply within 24 hours" },
               { icon: <MapPin size={18} />, label: "Based in", value: "Lisbon, Portugal", sub: "Editorial HQ" },
               { icon: <MessageSquare size={18} />, label: "Live chat", value: "Bottom-right widget", sub: "Editorial team online" },
             ].map((item) => (
-              <div key={item.label} style={{ padding: 20, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, display: "flex", gap: 14, alignItems: "flex-start" }}>
+              <div 
+                key={item.label} 
+                style={{ 
+                  padding: 20, 
+                  background: "var(--surface)", 
+                  border: "1px solid var(--border)", 
+                  borderRadius: 12, 
+                  display: "flex", 
+                  gap: 14, 
+                  alignItems: "flex-start",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "var(--gold)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "var(--border)";
+                }}
+              >
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(201,169,110,0.1)", border: "1px solid rgba(201,169,110,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold)", flexShrink: 0 }}>
                   {item.icon}
                 </div>

@@ -1,10 +1,8 @@
-import React from "react";
-import { Shield, Lock, FileText, AlertCircle } from "lucide-react";
+"use client";
 
-export const metadata = {
-  title: "Privacy & Terms | ApexLoom",
-  description: "Privacy policy and terms of service for the ApexLoom travel platform.",
-};
+import React from "react";
+import Image from "next/image";
+import { Shield, Lock, FileText, AlertCircle } from "lucide-react";
 
 const policySections = [
   {
@@ -33,30 +31,47 @@ export default function PrivacyPage() {
   return (
     <main style={{ background: "var(--bg)", minHeight: "100vh" }}>
       <section style={{ maxWidth: 900, margin: "0 auto", padding: "80px 32px 64px" }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "5px 14px", border: "1px solid rgba(201,169,110,0.25)", borderRadius: 99, background: "rgba(201,169,110,0.08)", color: "var(--gold)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 24 }}>
-            Legal & Trust
-          </span>
-          <h1 style={{ margin: "0 0 20px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
-            Privacy & Terms.
-          </h1>
-          <p style={{ maxWidth: 580, margin: "0 auto", color: "var(--text-2)", fontSize: "1.05rem", lineHeight: 1.75 }}>
-            Our commitment to transparency, data minimization, and editorial independence. We value your privacy as much as your travel experience.
-          </p>
+        {/* Banner Card */}
+        <div style={{ position: "relative", height: 260, borderRadius: 14, overflow: "hidden", border: "1px solid var(--border)", marginBottom: 48 }}>
+          <Image
+            src="https://images.unsplash.com/photo-1449244409830-a190c90c74fa?auto=format&fit=crop&w=1200&q=80"
+            alt="Secure environment banner"
+            fill
+            unoptimized
+            style={{ objectFit: "cover", opacity: 0.55 }}
+          />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(8,8,16,0.95) 0%, rgba(8,8,16,0.3) 100%)" }} />
+          <div style={{ position: "absolute", bottom: 32, left: 32, right: 32 }}>
+            <span style={{ display: "inline-block", padding: "5px 12px", border: "1px solid rgba(201,169,110,0.25)", borderRadius: 99, background: "rgba(201,169,110,0.08)", color: "var(--gold)", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 12 }}>
+              Trust & Integrity
+            </span>
+            <h1 style={{ margin: 0, fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.02em" }}>
+              Privacy Policy & Terms
+            </h1>
+          </div>
         </div>
 
         {/* Content */}
         <div style={{ display: "grid", gap: 32 }}>
           {policySections.map((section, idx) => (
-            <div key={idx} style={{ 
-              padding: "40px", 
-              background: "var(--surface)", 
-              border: "1px solid var(--border)", 
-              borderRadius: "14px",
-              display: "grid",
-              gap: "16px"
-            }}>
+            <div 
+              key={idx} 
+              style={{ 
+                padding: "40px", 
+                background: "var(--surface)", 
+                border: "1px solid var(--border)", 
+                borderRadius: "14px",
+                display: "grid",
+                gap: "16px",
+                transition: "all 0.3s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "var(--gold)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+              }}
+            >
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,169,110,0.1)", border: "1px solid rgba(201,169,110,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold)" }}>
                   {section.icon}

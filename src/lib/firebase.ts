@@ -1,5 +1,11 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  FacebookAuthProvider, 
+  TwitterAuthProvider, 
+  OAuthProvider 
+} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,8 +23,8 @@ const app = getApps().length === 0 && firebaseConfig.apiKey
 
 const auth = app ? getAuth(app) : null;
 const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
+const twitterProvider = new TwitterAuthProvider();
+const appleProvider = new OAuthProvider("apple.com");
 
-// Optional: you can force custom prompt or select account
-// googleProvider.setCustomParameters({ prompt: "select_account" });
-
-export { app, auth, googleProvider };
+export { app, auth, googleProvider, facebookProvider, twitterProvider, appleProvider };

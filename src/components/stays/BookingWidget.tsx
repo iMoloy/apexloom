@@ -287,9 +287,10 @@ export function BookingWidget({ staySlug, pricePerNight, maxGuests, stayTitle }:
   }, [checkIn, minDate]);
 
   useEffect(() => {
-    if (checkIn && checkOut && checkIn >= checkOut) {
+    if (checkIn && (!checkOut || checkOut <= checkIn)) {
       const nextDay = new Date(checkIn);
       nextDay.setDate(nextDay.getDate() + 1);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCheckOut(nextDay.toISOString().slice(0, 10));
     }
   }, [checkIn, checkOut]);

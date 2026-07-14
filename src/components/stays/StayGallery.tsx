@@ -7,6 +7,7 @@ import Link from "next/link";
 import { buildStayArtUrl } from "@/lib/stays";
 import type { StayItem } from "@/data/stays";
 import { DEFAULT_STAY_IMAGE } from "./StayCard";
+import { FavoriteButton } from "./FavoriteButton";
 
 function ImageWithFallback({ src, fallback, ...props }: any) {
   const [error, setError] = useState(false);
@@ -151,6 +152,18 @@ export function StayGallery({ stay }: StayGalleryProps) {
               Back to Explore
             </Link>
           </div>
+
+          {/* Favorite Button overlaid on hero top right */}
+          <FavoriteButton
+            staySlug={stay.slug}
+            size={20}
+            style={{
+              top: 28,
+              right: 32,
+              background: "rgba(8,8,16,0.7)",
+              border: "1px solid rgba(255,255,255,0.12)",
+            }}
+          />
 
           {/* Hero text overlay at bottom */}
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "40px 40px 36px", zIndex: 5 }}>

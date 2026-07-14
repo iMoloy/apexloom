@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppContext";
 import Link from "next/link";
-import { MapPin, Calendar, Users, Settings, LogOut, ArrowRight, Home, CreditCard, Mail, Phone, Shield, Camera, Loader2 } from "lucide-react";
+import { MapPin, Calendar, Users, Settings, LogOut, ArrowRight, Home, CreditCard, Mail, Phone, Shield, Camera, Loader2, Star, X } from "lucide-react";
 import type { BookingRecord } from "@/models/Booking";
 import Image from "next/image";
 
@@ -28,9 +28,17 @@ export default function ProfilePage() {
   const [location, setLocation] = useState("San Francisco, CA");
   const [isSaving, setIsSaving] = useState(false);
 
+  // Review Modal State
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewBooking, setReviewBooking] = useState<BookingRecord | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewQuote, setReviewQuote] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   // Sync name state when user loads (handles async auth)
   useEffect(() => {
     if (user?.name && !name) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(user.name);
     }
   }, [user?.name]); // eslint-disable-line
@@ -164,6 +172,48 @@ export default function ProfilePage() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    }
+  };
+
+  const handleOpenReview = (booking: BookingRecord) => {
+    setReviewBooking(booking);
+    setReviewRating(5);
+    setReviewQuote("");
+    setReviewModalOpen(true);
+  };
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewBooking || submittingReview) return;
+
+    if (!reviewQuote || reviewQuote.trim().length < 10) {
+      showToast("Please provide a review of at least 10 characters.", "error");
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          staySlug: reviewBooking.staySlug,
+          rating: reviewRating,
+          quote: reviewQuote,
+        }),
+      });
+
+      if (res.ok) {
+        showToast("Review published successfully!", "success");
+        setReviewModalOpen(false);
+      } else {
+        const data = await res.json();
+        showToast(data.error || "Failed to submit review.", "error");
+      }
+    } catch {
+      showToast("Network error while submitting review.", "error");
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -410,11 +460,30 @@ export default function ProfilePage() {
                             <span>{booking.checkIn} to {booking.checkOut}</span>
                           </p>
                         </div>
-                        <div style={{ textAlign: "right" }}>
+                        <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-end" }}>
                           <strong style={{ display: "block", fontSize: "1rem", color: "var(--text)", marginBottom: 4 }}>${booking.totalPaid}</strong>
                           <span style={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: booking.status === "cancelled" ? "#fca5a5" : "var(--gold)" }}>
                             {booking.status === "cancelled" ? "Cancelled" : "Completed"}
                           </span>
+                          {booking.status !== "cancelled" && (
+                            <button
+                              onClick={() => handleOpenReview(booking)}
+                              style={{
+                                padding: "6px 12px",
+                                background: "var(--surface-2)",
+                                border: "1px solid var(--border-2)",
+                                borderRadius: "6px",
+                                color: "var(--text-2)",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                transition: "all 0.2s"
+                              }}
+                              className="hover:border-[var(--gold)] hover:text-[var(--gold)]"
+                            >
+                              Leave a Review
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -552,6 +621,144 @@ export default function ProfilePage() {
 
         </div>
       </div>
+
+      {/* Review Modal */}
+      {reviewModalOpen && reviewBooking && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(8, 8, 16, 0.85)",
+          backdropFilter: "blur(12px)",
+          zIndex: 999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 20,
+        }}>
+          <div style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 14,
+            width: "100%",
+            maxWidth: 480,
+            padding: 32,
+            position: "relative",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+          }} className="animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setReviewModalOpen(false)}
+              style={{
+                position: "absolute",
+                top: 24,
+                right: 24,
+                background: "none",
+                border: "none",
+                color: "var(--text-3)",
+                cursor: "pointer",
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <h3 style={{ margin: "0 0 8px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.5rem", fontWeight: 600, color: "var(--text)" }}>
+              Rate your stay
+            </h3>
+            <p style={{ margin: "0 0 24px", color: "var(--text-3)", fontSize: "0.85rem", lineHeight: 1.5 }}>
+              Share your experience at <strong>{reviewBooking.stayTitle}</strong> with the community.
+            </p>
+
+            <form onSubmit={handleSubmitReview} style={{ display: "grid", gap: 20 }}>
+              <div>
+                <label style={{ display: "block", marginBottom: 12, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>
+                  Overall Rating
+                </label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 0,
+                        color: star <= reviewRating ? "var(--gold)" : "var(--border-2)",
+                        transition: "color 0.2s"
+                      }}
+                      className="hover:scale-110 transition-transform"
+                    >
+                      <Star size={32} fill={star <= reviewRating ? "currentColor" : "none"} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", marginBottom: 8, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>
+                  Written Review
+                </label>
+                <textarea
+                  placeholder="What made this place special? How was the host? Let others know about your trip."
+                  value={reviewQuote}
+                  onChange={(e) => setReviewQuote(e.target.value)}
+                  style={{
+                    width: "100%",
+                    height: "120px",
+                    padding: "16px",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border-2)",
+                    borderRadius: 8,
+                    color: "var(--text)",
+                    fontSize: "0.9rem",
+                    resize: "none",
+                    fontFamily: "inherit"
+                  }}
+                  className="focus:border-[var(--gold)] focus:outline-none"
+                  required
+                  minLength={10}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setReviewModalOpen(false)}
+                  style={{
+                    flex: 1,
+                    padding: "14px",
+                    background: "var(--surface-2)",
+                    color: "var(--text)",
+                    border: "1px solid var(--border-2)",
+                    borderRadius: 8,
+                    fontWeight: 600,
+                    cursor: "pointer"
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingReview}
+                  style={{
+                    flex: 2,
+                    padding: "14px",
+                    background: "var(--gold)",
+                    color: "var(--bg)",
+                    border: "none",
+                    borderRadius: 8,
+                    fontWeight: 700,
+                    cursor: submittingReview ? "not-allowed" : "pointer",
+                    opacity: submittingReview ? 0.7 : 1
+                  }}
+                >
+                  {submittingReview ? "Submitting..." : "Submit Review"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

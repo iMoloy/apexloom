@@ -56,6 +56,7 @@ export default function AddStayPage() {
   const [baths, setBaths] = useState<number>(2);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Build the live preview StayItem state
   const previewStay: StayItem = {
@@ -88,6 +89,37 @@ export default function AddStayPage() {
         ? current.filter((item) => item !== amenity)
         : [...current, amenity],
     );
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    showToast("Uploading image...", "info");
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const imgbbRes = await fetch(`https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const imgbbData = await imgbbRes.json();
+
+      if (imgbbData.success) {
+        setImageUrl(imgbbData.data.url);
+        showToast("Image uploaded successfully!", "success");
+      } else {
+        showToast("Failed to upload image.", "error");
+      }
+    } catch (err) {
+      showToast("Error connecting to image server.", "error");
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -292,17 +324,37 @@ export default function AddStayPage() {
             </div>
           </div>
 
-          {/* Optional Image URL */}
+          {/* Featured Image Upload */}
           <div>
-            <label style={labelStyle}>Featured Image URL (Optional)</label>
-            <input
-              type="url"
-              placeholder="https://example.com/image.jpg"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              style={inputStyle}
-              className="focus:border-[var(--gold)]"
-            />
+            <label style={labelStyle}>Featured Image *</label>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <label
+                style={{
+                  ...inputStyle,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: uploadingImage ? "var(--surface-3)" : "var(--surface-2)",
+                  cursor: uploadingImage ? "not-allowed" : "pointer",
+                  width: "200px"
+                }}
+              >
+                {uploadingImage ? "Uploading..." : imageUrl ? "Change Image" : "Upload Image"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploadingImage}
+                  style={{ display: "none" }}
+                />
+              </label>
+              {imageUrl && (
+                <span style={{ fontSize: "0.75rem", color: "var(--gold)", fontWeight: 600 }}>Image ready!</span>
+              )}
+            </div>
+            {!imageUrl && (
+              <p style={{ margin: "6px 0 0", fontSize: "0.7rem", color: "var(--text-3)" }}>Please upload a high-quality preview image.</p>
+            )}
           </div>
 
           {/* Core specs details */}

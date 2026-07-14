@@ -3,6 +3,7 @@ import { getUserFromRequest } from "@/lib/auth";
 import connectToDatabase from "@/lib/mongoose";
 import { Booking } from "@/models/Booking";
 import { Stay } from "@/models/Stay";
+import { sendEmail } from "@/lib/email";
 
 export async function GET(req: NextRequest) {
   const user = getUserFromRequest(req);
@@ -68,6 +69,31 @@ export async function POST(req: NextRequest) {
     });
 
     await bookingRecord.save();
+
+    // Trigger confirmation email
+    const emailHtml = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h1 style="color: #c9a96e; text-align: center;">ApexLoom Booking Confirmed</h1>
+        <p>Hi ${user.name},</p>
+        <p>Your curated stay at <strong>${stay.title}</strong> is confirmed!</p>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Location:</strong> ${stay.location}, ${stay.country}</p>
+          <p><strong>Check-in:</strong> ${checkIn}</p>
+          <p><strong>Check-out:</strong> ${checkOut}</p>
+          <p><strong>Guests:</strong> ${guests}</p>
+          <p><strong>Total Paid:</strong> $${totalPaid}</p>
+        </div>
+        <p>You can manage your reservation in the <a href="https://apexloom.vercel.app/profile" style="color: #c9a96e; text-decoration: none;">Member Portal</a>.</p>
+        <p>Thank you for choosing ApexLoom.</p>
+      </div>
+    `;
+    
+    // We send it asynchronously so we don't block the response
+    sendEmail({
+      to: user.email,
+      subject: `Booking Confirmed: ${stay.title}`,
+      html: emailHtml,
+    }).catch(console.error);
 
     return NextResponse.json({ message: "Booking registered successfully.", booking: bookingRecord }, { status: 201 });
   } catch (err) {

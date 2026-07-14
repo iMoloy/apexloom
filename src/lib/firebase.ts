@@ -23,6 +23,9 @@ const app = getApps().length === 0 && firebaseConfig.apiKey
 
 const auth = app ? getAuth(app) : null;
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: "select_account"
+});
 const facebookProvider = new FacebookAuthProvider();
 const twitterProvider = new TwitterAuthProvider();
 const appleProvider = new OAuthProvider("apple.com");

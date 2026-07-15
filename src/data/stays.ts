@@ -29,6 +29,8 @@ export type StayItem = {
   reviews: StayReview[];
   ownerEmail?: string;
   imageUrl?: string;
+  loungeImageUrl?: string;
+  suiteImageUrl?: string;
 };
 
 export const stayItems: StayItem[] = [
@@ -57,6 +59,8 @@ export const stayItems: StayItem[] = [
     amenities: ["Dedicated workspace", "Balcony dining", "Self check-in", "Curated city guide"],
     galleryLabels: ["Street-facing salon", "Light-filled dining room", "Quiet upstairs suite"],
     imageUrl: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+    loungeImageUrl: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80",
+    suiteImageUrl: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80",
     reviews: [
       {
         author: "Nadia Rahman",
@@ -99,6 +103,8 @@ export const stayItems: StayItem[] = [
     amenities: ["Fast Wi-Fi", "Portable monitor", "Lift access", "Harbor walking route"],
     galleryLabels: ["Window lounge", "Compact studio kitchen", "Calm bedroom corner"],
     imageUrl: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80",
+    loungeImageUrl: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=800&q=80",
+    suiteImageUrl: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=800&q=80",
     reviews: [
       {
         author: "Mira Chen",
@@ -141,6 +147,8 @@ export const stayItems: StayItem[] = [
     amenities: ["Bike storage", "Harbor access", "Long-stay pantry", "Sound-insulated bedroom"],
     galleryLabels: ["Waterfront sitting room", "Kitchen and long table", "Bedroom with oak storage"],
     imageUrl: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?auto=format&fit=crop&w=800&q=80",
+    loungeImageUrl: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80",
+    suiteImageUrl: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
     reviews: [
       {
         author: "Elise Turner",
@@ -181,6 +189,8 @@ export const stayItems: StayItem[] = [
     amenities: ["Garden kitchen", "Fireplace", "Freestanding tub", "Local produce guide"],
     galleryLabels: ["Garden dining room", "Cedar bath suite", "Stone courtyard"],
     imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+    loungeImageUrl: "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=800&q=80",
+    suiteImageUrl: "https://images.unsplash.com/photo-1560185127-6a2806647f81?auto=format&fit=crop&w=800&q=80",
     reviews: [
       {
         author: "Alicia Moore",
@@ -223,6 +233,8 @@ export const stayItems: StayItem[] = [
     amenities: ["Wood stove", "Loft reading nook", "Trail access", "Seasonal pantry basics"],
     galleryLabels: ["Meadow-facing lounge", "Loft reading nook", "Warm timber bedroom"],
     imageUrl: "https://images.unsplash.com/photo-1542314831-c6a4d1424368?auto=format&fit=crop&w=800&q=80",
+    loungeImageUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80",
+    suiteImageUrl: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80",
     reviews: [
       {
         author: "Lena Ortiz",
@@ -263,6 +275,8 @@ export const stayItems: StayItem[] = [
     amenities: ["Pool courtyard", "Private chef option", "Multiple terraces", "Local concierge"],
     galleryLabels: ["Olive courtyard", "Stone dining room", "Private suite terrace"],
     imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+    loungeImageUrl: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80",
+    suiteImageUrl: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
     reviews: [
       {
         author: "Priya Saha",
@@ -303,6 +317,8 @@ export const stayItems: StayItem[] = [
     amenities: ["Harbor terraces", "Private parking", "Remote-work room", "Host concierge"],
     galleryLabels: ["Upper terrace lounge", "Sculptural stair hall", "Calm guest suite"],
     imageUrl: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
+    loungeImageUrl: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80",
+    suiteImageUrl: "https://images.unsplash.com/photo-1617806118233-18e1db207f62?auto=format&fit=crop&w=800&q=80",
     reviews: [
       {
         author: "Julia Park",
@@ -343,6 +359,8 @@ export const stayItems: StayItem[] = [
     amenities: ["Roof terrace", "Protected courtyard", "Surf storage", "Local host guide"],
     galleryLabels: ["Courtyard lounge", "Rooftop supper setting", "Textured guest room"],
     imageUrl: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80",
+    loungeImageUrl: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=800&q=80",
+    suiteImageUrl: "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&w=800&q=80",
     reviews: [
       {
         author: "Farah El Amin",

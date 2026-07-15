@@ -7,7 +7,7 @@ import { StayGrid } from "@/components/stays/StayGrid";
 import { buildStayArtUrl } from "@/lib/stays";
 import { getRelatedStays, getStayBySlug } from "@/lib/staysServer";
 import { BookingWidget } from "@/components/stays/BookingWidget";
-import { StayGallery } from "@/components/stays/StayGallery";
+import { StayHeader, StayGalleryCollage } from "@/components/stays/StayGallery";
 import { StayReviews } from "@/components/stays/StayReviews";
 
 type StayDetailsPageProps = {
@@ -33,34 +33,29 @@ export default async function StayDetailsPage({ params }: StayDetailsPageProps) 
   return (
     <main style={{ background: "var(--bg)", minHeight: "100vh" }}>
 
-      {/* ══════════════════════════════════════
-          HERO & GALLERY
-      ══════════════════════════════════════ */}
-      <StayGallery stay={stay} />
+      {/* ── HEADER DETAILS ── */}
+      <StayHeader stay={stay} />
 
-      {/* ══════════════════════════════════════
-          QUICK PILLS
-      ══════════════════════════════════════ */}
-      <div style={{ maxWidth: 1440, margin: "0 auto", padding: "20px 32px 0" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {[stay.stayType, `${stay.guestCount} guests`, `${stay.bedrooms} beds`, `${stay.baths} baths`, stay.bestFor].map((tag) => (
-            <span
-              key={tag}
-              style={{ padding: "6px 14px", background: "var(--surface)", border: "1px solid var(--border-2)", borderRadius: 6, color: "var(--text-2)", fontSize: "0.8rem", fontWeight: 600 }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════
-          MAIN CONTENT + SIDEBAR
-      ══════════════════════════════════════ */}
-      <section style={{ maxWidth: 1440, margin: "0 auto", padding: "32px 32px 80px", display: "grid", gridTemplateColumns: "minmax(0, 1.6fr) 420px", gap: 28, alignItems: "start" }}>
+      {/* ── MAIN CONTENT + SIDEBAR ── */}
+      <section className="max-w-[1440px] mx-auto px-4 md:px-8 py-6 pb-20 grid grid-cols-1 lg:grid-cols-[1.6fr_420px] gap-8 items-start">
 
         {/* LEFT — Content panels */}
-        <div style={{ display: "grid", gap: 20 }}>
+        <div className="grid grid-cols-1 gap-6">
+
+          {/* Collage of images */}
+          <StayGalleryCollage stay={stay} />
+
+          {/* QUICK PILLS */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {[stay.stayType, `${stay.guestCount} guests`, `${stay.bedrooms} beds`, `${stay.baths} baths`, stay.bestFor].map((tag) => (
+              <span
+                key={tag}
+                style={{ padding: "6px 14px", background: "var(--surface)", border: "1px solid var(--border-2)", borderRadius: 6, color: "var(--text-2)", fontSize: "0.8rem", fontWeight: 600 }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
 
           {/* Overview */}
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: 32 }}>
@@ -75,7 +70,7 @@ export default async function StayDetailsPage({ params }: StayDetailsPageProps) 
           </div>
 
           {/* Specs cards row */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { icon: <Users size={18} />, val: `${stay.guestCount}`, label: "Guests" },
               { icon: <BedDouble size={18} />, val: `${stay.bedrooms}`, label: "Bedrooms" },
@@ -99,7 +94,7 @@ export default async function StayDetailsPage({ params }: StayDetailsPageProps) 
             <h2 style={{ margin: "0 0 20px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "1.6rem", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.02em" }}>
               What&apos;s included
             </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {stay.amenities.map((amenity) => (
                 <div key={amenity} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8 }}>
                   <span style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(201,169,110,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -127,8 +122,8 @@ export default async function StayDetailsPage({ params }: StayDetailsPageProps) 
           <StayReviews initialReviews={stay.reviews} staySlug={stay.slug} />
         </div>
 
-        {/* RIGHT — Sticky sidebar */}
-        <div style={{ position: "sticky", top: 88, display: "grid", gap: 16 }}>
+        {/* RIGHT — Sidebar */}
+        <div style={{ display: "grid", gap: 20 }}>
           <BookingWidget
             staySlug={stay.slug}
             pricePerNight={stay.pricePerNight}

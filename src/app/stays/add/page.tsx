@@ -47,6 +47,8 @@ export default function AddStayPage() {
   const [stayType, setStayType] = useState<any>("House");
   const [pricePerNight, setPricePerNight] = useState<number>(250);
   const [imageUrl, setImageUrl] = useState("");
+  const [loungeImageUrl, setLoungeImageUrl] = useState("");
+  const [suiteImageUrl, setSuiteImageUrl] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [fullDescription, setFullDescription] = useState("");
   const [hostNote, setHostNote] = useState("");
@@ -57,6 +59,8 @@ export default function AddStayPage() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingLoungeImage, setUploadingLoungeImage] = useState(false);
+  const [uploadingSuiteImage, setUploadingSuiteImage] = useState(false);
 
   // Build the live preview StayItem state
   const previewStay: StayItem = {
@@ -81,6 +85,9 @@ export default function AddStayPage() {
     amenities: selectedAmenities,
     galleryLabels: ["Entrance", "Lounge", "Suite"],
     reviews: [],
+    imageUrl: imageUrl || undefined,
+    loungeImageUrl: loungeImageUrl || undefined,
+    suiteImageUrl: suiteImageUrl || undefined,
   };
 
   const handleAmenityToggle = (amenity: string) => {
@@ -91,12 +98,15 @@ export default function AddStayPage() {
     );
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "cover" | "lounge" | "suite") => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingImage(true);
-    showToast("Uploading image...", "info");
+    if (target === "cover") setUploadingImage(true);
+    else if (target === "lounge") setUploadingLoungeImage(true);
+    else if (target === "suite") setUploadingSuiteImage(true);
+
+    showToast(`Uploading ${target} image...`, "info");
 
     const formData = new FormData();
     formData.append("image", file);
@@ -110,15 +120,19 @@ export default function AddStayPage() {
       const imgbbData = await imgbbRes.json();
 
       if (imgbbData.success) {
-        setImageUrl(imgbbData.data.url);
-        showToast("Image uploaded successfully!", "success");
+        if (target === "cover") setImageUrl(imgbbData.data.url);
+        else if (target === "lounge") setLoungeImageUrl(imgbbData.data.url);
+        else if (target === "suite") setSuiteImageUrl(imgbbData.data.url);
+        showToast(`${target.charAt(0).toUpperCase() + target.slice(1)} image uploaded successfully!`, "success");
       } else {
-        showToast("Failed to upload image.", "error");
+        showToast(`Failed to upload ${target} image.`, "error");
       }
     } catch (err) {
       showToast("Error connecting to image server.", "error");
     } finally {
-      setUploadingImage(false);
+      if (target === "cover") setUploadingImage(false);
+      else if (target === "lounge") setUploadingLoungeImage(false);
+      else if (target === "suite") setUploadingSuiteImage(false);
     }
   };
 
@@ -154,6 +168,8 @@ export default function AddStayPage() {
           stayType,
           pricePerNight,
           imageUrl,
+          loungeImageUrl,
+          suiteImageUrl,
           shortDescription,
           fullDescription,
           hostNote,
@@ -324,37 +340,104 @@ export default function AddStayPage() {
             </div>
           </div>
 
-          {/* Featured Image Upload */}
-          <div>
-            <label style={labelStyle}>Featured Image *</label>
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <label
-                style={{
-                  ...inputStyle,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: uploadingImage ? "var(--surface-3)" : "var(--surface-2)",
-                  cursor: uploadingImage ? "not-allowed" : "pointer",
-                  width: "200px"
-                }}
-              >
-                {uploadingImage ? "Uploading..." : imageUrl ? "Change Image" : "Upload Image"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={uploadingImage}
-                  style={{ display: "none" }}
-                />
-              </label>
-              {imageUrl && (
-                <span style={{ fontSize: "0.75rem", color: "var(--gold)", fontWeight: 600 }}>Image ready!</span>
-              )}
+          {/* Images Section */}
+          <div className="space-y-4">
+            <span style={{ display: "inline-block", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)" }}>Property Gallery (3 Images Required)</span>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Featured Image */}
+              <div>
+                <label style={labelStyle}>Featured Image *</label>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  <label
+                    style={{
+                      ...inputStyle,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: uploadingImage ? "var(--surface-3)" : "var(--surface-2)",
+                      cursor: uploadingImage ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {uploadingImage ? "Uploading..." : imageUrl ? "Change Cover" : "Upload Cover"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, "cover")}
+                      disabled={uploadingImage}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                </div>
+                {imageUrl ? (
+                  <span style={{ display: "block", marginTop: 4, fontSize: "0.75rem", color: "var(--gold)", fontWeight: 600 }}>Image ready!</span>
+                ) : (
+                  <p style={{ margin: "6px 0 0", fontSize: "0.7rem", color: "var(--text-3)" }}>Please upload the main preview image.</p>
+                )}
+              </div>
+
+              {/* Lounge Image */}
+              <div>
+                <label style={labelStyle}>Lounge Image *</label>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  <label
+                    style={{
+                      ...inputStyle,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: uploadingLoungeImage ? "var(--surface-3)" : "var(--surface-2)",
+                      cursor: uploadingLoungeImage ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {uploadingLoungeImage ? "Uploading..." : loungeImageUrl ? "Change Lounge" : "Upload Lounge"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, "lounge")}
+                      disabled={uploadingLoungeImage}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                </div>
+                {loungeImageUrl ? (
+                  <span style={{ display: "block", marginTop: 4, fontSize: "0.75rem", color: "var(--gold)", fontWeight: 600 }}>Image ready!</span>
+                ) : (
+                  <p style={{ margin: "6px 0 0", fontSize: "0.7rem", color: "var(--text-3)" }}>Please upload the lounge view image.</p>
+                )}
+              </div>
+
+              {/* Suite Image */}
+              <div>
+                <label style={labelStyle}>Suite Image *</label>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  <label
+                    style={{
+                      ...inputStyle,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: uploadingSuiteImage ? "var(--surface-3)" : "var(--surface-2)",
+                      cursor: uploadingSuiteImage ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {uploadingSuiteImage ? "Uploading..." : suiteImageUrl ? "Change Suite" : "Upload Suite"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, "suite")}
+                      disabled={uploadingSuiteImage}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                </div>
+                {suiteImageUrl ? (
+                  <span style={{ display: "block", marginTop: 4, fontSize: "0.75rem", color: "var(--gold)", fontWeight: 600 }}>Image ready!</span>
+                ) : (
+                  <p style={{ margin: "6px 0 0", fontSize: "0.7rem", color: "var(--text-3)" }}>Please upload the suite bedroom view image.</p>
+                )}
+              </div>
             </div>
-            {!imageUrl && (
-              <p style={{ margin: "6px 0 0", fontSize: "0.7rem", color: "var(--text-3)" }}>Please upload a high-quality preview image.</p>
-            )}
           </div>
 
           {/* Core specs details */}

@@ -103,37 +103,14 @@ function LoginContent() {
 
 
 
-  const handleAutoFill = async (role: "host" | "guest") => {
+  const handleAutoFill = (role: "host" | "guest") => {
     const demEmail = role === "host" ? "host@apexloom.com" : "guest@apexloom.com";
     const demPass = role === "host" ? "host123" : "guest123";
     
     setEmail(demEmail);
     setPassword(demPass);
     setError("");
-    setSubmitting(true);
-    showToast(`Logging in as ${role.toUpperCase()}...`, "info");
-
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: demEmail, password: demPass }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        showToast(`Welcome back, ${data.user.name}!`, "success");
-        login(data.user);
-        router.push(redirectPath);
-      } else {
-        setError(data.error || "Invalid credentials.");
-        showToast(data.error || "Login failed.", "error");
-      }
-    } catch {
-      setError("A connection error occurred. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+    showToast(`${role.charAt(0).toUpperCase() + role.slice(1)} demo credentials filled. Click Sign In.`, "info");
   };
 
   const inputStyle: React.CSSProperties = {
@@ -246,22 +223,12 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={submitting}
+                className="stay-card__action"
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
                   width: "100%",
-                  padding: "13px",
-                  background: submitting ? "var(--surface-3)" : "var(--gold)",
-                  color: submitting ? "var(--text-3)" : "var(--bg)",
-                  border: "none",
-                  borderRadius: 8,
-                  fontWeight: 700,
-                  fontSize: "0.9rem",
-                  cursor: submitting ? "not-allowed" : "pointer",
-                  transition: "all 0.2s",
                   marginTop: 4,
+                  opacity: submitting ? 0.7 : 1,
+                  cursor: submitting ? "not-allowed" : "pointer",
                 }}
               >
                 <LogIn size={16} />
@@ -281,20 +248,11 @@ function LoginContent() {
                   type="button"
                   onClick={() => handleSocialLogin("google")}
                   disabled={googleLoading || submitting}
+                  className="stay-card__action"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                    padding: "14px",
-                    background: "var(--surface)",
-                    color: "var(--text)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
+                    width: "100%",
+                    opacity: googleLoading || submitting ? 0.7 : 1,
                     cursor: googleLoading || submitting ? "not-allowed" : "pointer",
-                    transition: "all 0.2s",
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -319,14 +277,14 @@ function LoginContent() {
               <button
                 type="button"
                 onClick={() => handleAutoFill("host")}
-                style={{ padding: "10px", border: "1px solid var(--border-2)", borderRadius: 8, background: "var(--surface-2)", color: "var(--text-2)", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}
+                className="stay-card__action"
               >
                 Host Demo
               </button>
               <button
                 type="button"
                 onClick={() => handleAutoFill("guest")}
-                style={{ padding: "10px", border: "1px solid var(--border-2)", borderRadius: 8, background: "var(--surface-2)", color: "var(--text-2)", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}
+                className="stay-card__action"
               >
                 Guest Demo
               </button>

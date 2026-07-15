@@ -4,27 +4,48 @@ import { Booking } from "@/models/Booking";
 import { type StayItem, stayItems } from "@/data/stays";
 import type { ExploreQuery, ExploreResult } from "./stays";
 
+function serialize<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 // Seed default stays if the database is empty
 async function seedDefaultStays() {
   await connectToDatabase();
+  
+  // Check if we need to re-seed to apply the new lounge/suite images
+  const hasOldStays = await Stay.exists({ ownerEmail: "host@apexloom.com", loungeImageUrl: { $exists: false } });
+  if (hasOldStays) {
+    await Stay.deleteMany({ ownerEmail: "host@apexloom.com" });
+    console.log("Deleted old default stays to force re-seeding with new images");
+  }
+
   const count = await Stay.countDocuments();
   if (count === 0) {
     const staysWithOwner = stayItems.map(stay => ({ ...stay, ownerEmail: "host@apexloom.com" }));
-    await Stay.insertMany(staysWithOwner);
-    console.log("Seeded database with default stays");
+    try {
+      await Stay.insertMany(staysWithOwner);
+      console.log("Seeded database with default stays");
+    } catch (err: any) {
+      // Ignore duplicate key error (code 11000) caused by concurrent requests
+      if (err.code === 11000 || err.message?.includes("E11000")) {
+        console.log("Database already seeded by concurrent request, skipped.");
+      } else {
+        throw err;
+      }
+    }
   }
 }
 
 export async function getFeaturedStays(limit = 4): Promise<StayItem[]> {
   await seedDefaultStays();
   const stays = await Stay.find({ featured: true }).sort({ rating: -1 }).limit(limit).lean();
-  return stays as unknown as StayItem[];
+  return serialize(stays as unknown as StayItem[]);
 }
 
 export async function getStayBySlug(slug: string): Promise<StayItem | null> {
   await seedDefaultStays();
   const stay = await Stay.findOne({ slug }).lean();
-  return stay ? (stay as unknown as StayItem) : null;
+  return stay ? serialize(stay as unknown as StayItem) : null;
 }
 
 export async function getRelatedStays(stay: StayItem, limit = 4): Promise<StayItem[]> {
@@ -43,7 +64,7 @@ export async function getRelatedStays(stay: StayItem, limit = 4): Promise<StayIt
     results = [...results, ...more as unknown as StayItem[]];
   }
 
-  return results;
+  return serialize(results);
 }
 
 export async function filterAndPaginateStays({
@@ -133,7 +154,7 @@ export async function filterAndPaginateStays({
     .lean();
 
   return {
-    items: items as unknown as StayItem[],
+    items: serialize(items as unknown as StayItem[]),
     totalItems,
     totalPages,
     currentPage,

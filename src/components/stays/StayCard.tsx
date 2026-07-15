@@ -134,13 +134,23 @@ export function StayCard({ stay, isPreview = false }: StayCardProps) {
 
         {/* CTA */}
         {isPreview ? (
-          <span className="stay-card__action" style={{ opacity: 0.4, pointerEvents: "none" }}>Preview Mode</span>
+          <div style={{ display: "flex", gap: 8 }}>
+            <span className="stay-card__action" style={{ flex: 1, opacity: 0.4, pointerEvents: "none" }}>Preview</span>
+            <span className="stay-card__action" style={{ flex: 1, opacity: 0.4, pointerEvents: "none" }}>Preview</span>
+          </div>
         ) : (
-          <Link className="stay-card__action" href={`/stays/${stay.slug}`}
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
-          >
-            View Details <ArrowUpRight size={14} />
-          </Link>
+          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+            <Link className="stay-card__action" href={`/stays/${stay.slug}`}
+              style={{ flex: 1 }}
+            >
+              Details
+            </Link>
+            <Link className="stay-card__action" href={`/stays/${stay.slug}?action=book`}
+              style={{ flex: 1.2 }}
+            >
+              Book Now <ArrowUpRight size={14} />
+            </Link>
+          </div>
         )}
       </div>
     </article>

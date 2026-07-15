@@ -34,6 +34,8 @@ export async function POST(req: NextRequest) {
       baths,
       amenities,
       imageUrl,
+      loungeImageUrl,
+      suiteImageUrl,
     } = data;
 
     if (
@@ -96,6 +98,8 @@ export async function POST(req: NextRequest) {
       ],
       ownerEmail: user.email,
       imageUrl,
+      loungeImageUrl,
+      suiteImageUrl,
     });
 
     await newStay.save();

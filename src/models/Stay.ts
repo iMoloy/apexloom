@@ -32,9 +32,15 @@ const StaySchema = new mongoose.Schema({
   reviews: [ReviewSchema],
   ownerEmail: { type: String },
   imageUrl: { type: String },
+  loungeImageUrl: { type: String },
+  suiteImageUrl: { type: String },
 }, {
   timestamps: true,
   collection: "stays"
 });
 
-export const Stay = (mongoose.models.Stay || mongoose.model<StayItem>("Stay", StaySchema)) as mongoose.Model<StayItem>;
+if (mongoose.models.Stay) {
+  delete mongoose.models.Stay;
+}
+
+export const Stay = mongoose.model<StayItem>("Stay", StaySchema);

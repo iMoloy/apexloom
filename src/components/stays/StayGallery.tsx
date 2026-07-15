@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { X, ChevronLeft, ChevronRight, Expand, ArrowLeft } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Expand, ArrowLeft, MapPin, Star } from "lucide-react";
 import Link from "next/link";
 import { buildStayArtUrl } from "@/lib/stays";
 import type { StayItem } from "@/data/stays";
@@ -21,23 +21,83 @@ function ImageWithFallback({ src, fallback, ...props }: any) {
   return <Image src={error ? fallback : src} alt={props.alt || ""} onError={() => setError(true)} {...props} />;
 }
 
-type StayGalleryProps = {
+type StayComponentProps = {
   stay: StayItem;
 };
 
-export function StayGallery({ stay }: StayGalleryProps) {
+export function StayHeader({ stay }: StayComponentProps) {
+  const stars = Math.round(stay.rating);
+
+  return (
+    <section className="bg-[var(--bg)] border-b border-[var(--border)]">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-5 flex flex-col gap-3">
+        {/* Top Row: Back Link & Actions */}
+        <div className="flex justify-between items-center">
+          <Link
+            href="/explore"
+            className="inline-flex items-center gap-1.5 text-[var(--text-3)] text-sm font-semibold transition-colors hover:text-[var(--gold)] no-underline"
+          >
+            <ArrowLeft size={16} />
+            Back to Explore
+          </Link>
+
+          <FavoriteButton
+            staySlug={stay.slug}
+            size={20}
+            style={{
+              position: "relative",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+            }}
+          />
+        </div>
+
+        {/* Bottom Row: Title and Meta */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+          <div>
+            <p className="m-0 mb-1 text-[var(--gold)] text-[11px] font-bold tracking-[0.15em] uppercase">
+              {stay.collection} Collection
+            </p>
+            <h1 className="m-0 mb-2 font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-[var(--text)] tracking-tight leading-tight">
+              {stay.title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="inline-flex items-center gap-1.5 text-[var(--text-2)] text-sm">
+                <MapPin size={16} style={{ color: "var(--gold)" }} />
+                {stay.location}, {stay.country}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[var(--text-2)] text-sm">
+                <span className="inline-flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} size={14} style={{ color: i < stars ? "var(--gold)" : "var(--border-2)", fill: i < stars ? "var(--gold)" : "transparent" }} />
+                  ))}
+                </span>
+                <strong className="text-[var(--text)]">{stay.rating}</strong>
+                <span className="text-[var(--text-3)]">({stay.reviewCount} reviews)</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="text-left md:text-right">
+            <span className="px-4 py-1.5 bg-[rgba(201,169,110,0.1)] border border-[rgba(201,169,110,0.2)] rounded-full text-[var(--gold)] text-sm font-bold inline-block">
+              ${stay.pricePerNight} / night
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function StayGalleryCollage({ stay }: StayComponentProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // We have 4 scenes: cover, and the 3 from galleryLabels
-  const scenes = ["cover", "cover", "lounge", "suite"] as const;
-  const allImages = [
-    { scene: "cover", label: "Main View" },
-    ...stay.galleryLabels.map((label, idx) => ({
-      scene: scenes[idx + 1] || "cover",
-      label,
-    }))
-  ];
+  const scenes = ["cover", "lounge", "suite"] as const;
+  const allImages = stay.galleryLabels.map((label, idx) => ({
+    scene: scenes[idx] || "cover",
+    label,
+  }));
 
   // Lock body scroll when lightbox is open
   useEffect(() => {
@@ -78,174 +138,86 @@ export function StayGallery({ stay }: StayGalleryProps) {
   
   const getImageUrl = (scene: string) => {
     if (scene === "cover" && stay.imageUrl) return stay.imageUrl;
+    if (scene === "lounge" && stay.loungeImageUrl) return stay.loungeImageUrl;
+    if (scene === "suite" && stay.suiteImageUrl) return stay.suiteImageUrl;
     return buildStayArtUrl(stay.slug, scene as any);
   };
-  
-  const stars = Math.round(stay.rating);
 
   return (
     <>
-      {/* ── FULL-BLEED HERO IMAGE ── */}
-      <section style={{ position: "relative" }}>
+      <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1fr] gap-3 h-[240px] md:h-[380px] w-full">
+        {/* Large Image (Index 0: Cover) */}
         <div 
-          style={{ position: "relative", height: "60vh", minHeight: 400, overflow: "hidden", cursor: "pointer" }}
           onClick={() => openLightbox(0)}
-          className="group"
+          className="group relative h-full rounded-xl overflow-hidden cursor-pointer border border-[var(--border)]"
         >
           <ImageWithFallback
             src={getImageUrl("cover")}
             fallback={DEFAULT_STAY_IMAGE}
-            alt={`${stay.title} — main view`}
+            alt={`${stay.title} - Main View`}
             fill
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, 60vw"
             unoptimized
-            priority
-            style={{ objectFit: "cover", transition: "transform 0.7s ease" }}
+            style={{ objectFit: "cover", transition: "transform 0.5s ease" }}
             className="group-hover:scale-105"
           />
-          {/* Dark gradient overlay */}
-          <div style={{
-            position: "absolute",
-            inset: 0,
-            background: "linear-gradient(to bottom, rgba(8,8,16,0.25) 0%, rgba(8,8,16,0.55) 100%)",
-            transition: "background 0.4s ease",
-          }} className="group-hover:bg-black/10" />
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <Expand size={24} style={{ color: "white" }} />
+          </div>
+          <div className="absolute bottom-4 left-5 z-10 text-[13px] font-bold tracking-wider uppercase text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            {stay.galleryLabels[0] || "Main View"}
+          </div>
+        </div>
 
-          {/* Expand Icon */}
-          <div style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            background: "rgba(8,8,16,0.6)",
-            backdropFilter: "blur(8px)",
-            color: "white",
-            padding: "16px",
-            borderRadius: "50%",
-            opacity: 0,
-            transition: "opacity 0.3s ease, transform 0.3s ease",
-          }} className="group-hover:opacity-100 group-hover:scale-110">
-            <Expand size={32} />
+        {/* Stack of 2 smaller images - visible on medium screens and up */}
+        <div className="hidden md:grid grid-rows-2 gap-3 h-full">
+          {/* Lounge Image */}
+          <div 
+            onClick={() => openLightbox(1)}
+            className="group relative rounded-xl overflow-hidden cursor-pointer border border-[var(--border)]"
+          >
+            <ImageWithFallback
+              src={getImageUrl("lounge")}
+              fallback={DEFAULT_STAY_IMAGE}
+              alt={`${stay.title} - Lounge`}
+              fill
+              sizes="30vw"
+              unoptimized
+              style={{ objectFit: "cover", transition: "transform 0.5s ease" }}
+              className="group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Expand size={20} style={{ color: "white" }} />
+            </div>
+            <div className="absolute bottom-3 left-4 z-10 text-[11px] font-bold tracking-wider uppercase text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              {stay.galleryLabels[1] || "Lounge"}
+            </div>
           </div>
 
-          {/* Back link overlaid on hero */}
-          <div style={{ position: "absolute", top: 28, left: 32, zIndex: 10 }}>
-            <Link
-              href="/explore"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 16px",
-                background: "rgba(8,8,16,0.7)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 99,
-                color: "var(--text-2)",
-                fontSize: "0.8rem",
-                fontWeight: 600,
-                transition: "all 0.2s",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ArrowLeft size={14} />
-              Back to Explore
-            </Link>
-          </div>
-
-          {/* Favorite Button overlaid on hero top right */}
-          <FavoriteButton
-            staySlug={stay.slug}
-            size={20}
-            style={{
-              top: 28,
-              right: 32,
-              background: "rgba(8,8,16,0.7)",
-              border: "1px solid rgba(255,255,255,0.12)",
-            }}
-          />
-
-          {/* Hero text overlay at bottom */}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "40px 40px 36px", zIndex: 5 }}>
-            <p style={{ margin: "0 0 10px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--gold)" }}>
-              {stay.collection}
-            </p>
-            <h1 style={{ margin: "0 0 12px", fontFamily: "var(--font-playfair), Georgia, serif", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 600, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.08 }}>
-              {stay.title}
-            </h1>
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 20 }}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.8)", fontSize: "0.875rem" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                {stay.location}, {stay.country}
-              </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.8)", fontSize: "0.875rem" }}>
-                {/* Star strip */}
-                <span style={{ display: "inline-flex", gap: 2 }}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <svg key={i} width="13" height="13" viewBox="0 0 20 20" style={{ fill: i < stars ? "#c9a96e" : "rgba(255,255,255,0.2)" }}>
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </span>
-                <strong style={{ color: "#fff" }}>{stay.rating}</strong>
-                <span style={{ color: "rgba(255,255,255,0.5)" }}>({stay.reviewCount} reviews)</span>
-              </span>
-              <span style={{ padding: "4px 12px", background: "rgba(201,169,110,0.2)", border: "1px solid rgba(201,169,110,0.3)", borderRadius: 99, color: "var(--gold)", fontSize: "0.78rem", fontWeight: 700 }}>
-                ${stay.pricePerNight} / night
-              </span>
+          {/* Suite Image */}
+          <div 
+            onClick={() => openLightbox(2)}
+            className="group relative rounded-xl overflow-hidden cursor-pointer border border-[var(--border)]"
+          >
+            <ImageWithFallback
+              src={getImageUrl("suite")}
+              fallback={DEFAULT_STAY_IMAGE}
+              alt={`${stay.title} - Suite`}
+              fill
+              sizes="30vw"
+              unoptimized
+              style={{ objectFit: "cover", transition: "transform 0.5s ease" }}
+              className="group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Expand size={20} style={{ color: "white" }} />
+            </div>
+            <div className="absolute bottom-3 left-4 z-10 text-[11px] font-bold tracking-wider uppercase text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              {stay.galleryLabels[2] || "Suite"}
             </div>
           </div>
         </div>
-
-        {/* ── SUB-GALLERY STRIP ── */}
-        <div style={{ maxWidth: 1440, margin: "0 auto", padding: "12px 32px 0" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-            {stay.galleryLabels.map((label, idx) => {
-              const sceneIndex = idx + 1; // offset by 1 because 0 is hero
-              return (
-                <div
-                  key={label}
-                  onClick={() => openLightbox(sceneIndex)}
-                  className="group"
-                  style={{
-                    position: "relative",
-                    height: 200,
-                    borderRadius: 10,
-                    overflow: "hidden",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--border)",
-                    cursor: "pointer"
-                  }}
-                >
-                  <ImageWithFallback
-                    src={getImageUrl(allImages[sceneIndex].scene)}
-                    fallback={DEFAULT_STAY_IMAGE}
-                    alt={`${stay.title} ${label}`}
-                    fill
-                    sizes="33vw"
-                    unoptimized
-                    style={{ objectFit: "cover", transition: "transform 0.5s ease" }}
-                    className="group-hover:scale-110"
-                  />
-                  <div style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "rgba(8,8,16,0.4)",
-                    opacity: 0,
-                    transition: "opacity 0.3s ease"
-                  }} className="group-hover:opacity-100 flex items-center justify-center">
-                    <Expand size={24} style={{ color: "white" }} />
-                  </div>
-                  {/* Label */}
-                  <div style={{ position: "absolute", bottom: 10, left: 12, zIndex: 2, fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.8)", textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>
-                    {label}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      </div>
 
       {/* ── LIGHTBOX MODAL ── */}
       {lightboxOpen && (
@@ -259,9 +231,9 @@ export function StayGallery({ stay }: StayGalleryProps) {
           flexDirection: "column"
         }}>
           {/* Lightbox Header */}
-          <div style={{ padding: "24px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ color: "var(--gold)", fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              {allImages[activeIndex].label} ({activeIndex + 1} / {allImages.length})
+          <div className="p-6 md:p-8 flex justify-between items-center">
+            <div className="text-[var(--gold)] text-[13px] font-bold tracking-wider uppercase">
+              {allImages[activeIndex]?.label} ({activeIndex + 1} / {allImages.length})
             </div>
             <button
               onClick={() => setLightboxOpen(false)}
@@ -284,7 +256,7 @@ export function StayGallery({ stay }: StayGalleryProps) {
           </div>
 
           {/* Lightbox Image Container */}
-          <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 80px 40px" }}>
+          <div className="flex-1 relative flex items-center justify-center px-8 md:px-20 pb-10">
             {/* Prev Button */}
             <button
               onClick={(e) => { e.stopPropagation(); prevImage(); }}
@@ -308,11 +280,11 @@ export function StayGallery({ stay }: StayGalleryProps) {
             </button>
 
             {/* Main Image */}
-            <div style={{ position: "relative", width: "100%", height: "100%", maxWidth: 1400, maxHeight: "85vh" }}>
+            <div className="relative w-full h-full max-w-[1400px] max-h-[85vh]">
               <ImageWithFallback
-                src={getImageUrl(allImages[activeIndex].scene)}
+                src={getImageUrl(allImages[activeIndex]?.scene)}
                 fallback={DEFAULT_STAY_IMAGE}
-                alt={allImages[activeIndex].label}
+                alt={allImages[activeIndex]?.label || ""}
                 fill
                 style={{ objectFit: "contain" }}
                 unoptimized

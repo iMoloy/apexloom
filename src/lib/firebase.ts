@@ -1,10 +1,7 @@
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
-  GoogleAuthProvider, 
-  FacebookAuthProvider, 
-  TwitterAuthProvider, 
-  OAuthProvider 
+  GoogleAuthProvider
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -26,8 +23,5 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: "select_account"
 });
-const facebookProvider = new FacebookAuthProvider();
-const twitterProvider = new TwitterAuthProvider();
-const appleProvider = new OAuthProvider("apple.com");
 
-export { app, auth, googleProvider, facebookProvider, twitterProvider, appleProvider };
+export { app, auth, googleProvider };

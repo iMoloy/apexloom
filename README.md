@@ -35,7 +35,7 @@
 - **Firebase & Google Authentication** — Seamless integration for secure user sign-in via Google Social Login.
 - **Host Analytics Dashboard** — Interactive charts showing income, booking trends, occupancy rates, and listing statistics.
 - **Interactive Booking Widget** — Integrated stay reservation flow with cost calculation, guest selector, and booking simulation.
-- **Stays CRUD Management** — Split-pane panel allowing hosts to publish, update, delete, and monitor their listings.
+- **Stays CRUD Management** — Split-pane panel allowing hosts to publish (supporting Cover, Lounge, and Suite image uploads via ImgBB), update, delete, and monitor their listings.
 - **Mongoose & MongoDB Integration** — Dynamic persistence for listings, booking history, user sessions, and reviews.
 - **Live Chat Widget** — Elegant, expandable floating widget to support user queries.
 - **Responsive, Bento Grid UI** — Premium CSS styling with custom glassmorphism, input glows, and bento-grid components.
@@ -101,25 +101,49 @@
    Create `.env.local` based on `.env.example`:
 
    ```env
-   # Database URI
-   MONGODB_URI="your-mongodb-atlas-connection-string"
-   JWT_SECRET="your-jwt-cookie-signing-secret"
+    # Database URI
+    MONGODB_URI="your-mongodb-atlas-connection-string"
+    JWT_SECRET="your-jwt-cookie-signing-secret"
 
-   # Firebase Config
-   NEXT_PUBLIC_FIREBASE_API_KEY="your-api-key"
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID="your-project-id"
-   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
-   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your-sender-id"
-   NEXT_PUBLIC_FIREBASE_APP_ID="your-app-id"
-   ```
+    # Firebase Config
+    NEXT_PUBLIC_FIREBASE_API_KEY="your-api-key"
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID="your-project-id"
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your-sender-id"
+    NEXT_PUBLIC_FIREBASE_APP_ID="your-app-id"
 
-4. **Verify Database Connection**
+    # SMTP Configuration (Optional, for email receipts)
+    SMTP_HOST="smtp.gmail.com"
+    SMTP_PORT=587
+    SMTP_SECURE="false"
+    SMTP_USER="your_email@gmail.com"
+    SMTP_PASS="your_app_password"
 
-   Check if the database connects successfully:
-   ```bash
-   node test-db.js
-   ```
+    # ImgBB Key
+    NEXT_PUBLIC_IMGBB_API_KEY="your-imgbb-api-key"
+    ```
+
+---
+
+## 🔐 Evaluation Credentials
+
+For fast review and evaluation, use the one-click auto-fill buttons on the login screen or enter the following accounts manually:
+
+| Role | Username / Email | Password |
+|---|---|---|
+| **Platform Host (Admin Dashboard)** | `host@apexloom.com` | `host123` |
+| **Platform Guest (Booking Portal)** | `guest@apexloom.com` | `guest123` |
+| **System Admin** | `admin@apexloom.com` | `admin123` |
+
+---
+
+## 4. Verify Database Connection
+
+Check if the database connects successfully:
+```bash
+node test-db.js
+```
 
 5. **Start the development server**
 

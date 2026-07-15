@@ -36,7 +36,8 @@ const StaySchema = new mongoose.Schema({
   suiteImageUrl: { type: String },
 }, {
   timestamps: true,
-  collection: "stays"
+  collection: "stays",
+  suppressReservedKeysWarning: true
 });
 
 if (mongoose.models.Stay) {

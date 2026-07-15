@@ -14,6 +14,14 @@
 
 ---
 
+## 📸 App Preview
+
+<div align="center">
+  <img src="./public/screenshot.png" width="100%" alt="ApexLoom Landing Page Preview" />
+</div>
+
+---
+
 ## 🛠️ Technologies Used
 
 | Technology | Version | Purpose |

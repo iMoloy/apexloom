@@ -14,14 +14,6 @@
 
 ---
 
-## 📸 App Preview
-
-<div align="center">
-  <img src="./public/screenshot.png" width="100%" alt="ApexLoom Landing Page Preview" />
-</div>
-
----
-
 ## 🛠️ Technologies Used
 
 | Technology | Version | Purpose |
@@ -169,6 +161,14 @@ node test-db.js
 | `npm run build` | Build for production |
 | `npm run start` | Serve production build |
 | `npm run lint` | Run ESLint check |
+
+---
+
+## 📸 App Preview
+
+<div align="center">
+  <img src="./public/screenshot_v2.png" width="100%" alt="ApexLoom Landing Page Preview" />
+</div>
 
 ---
 
